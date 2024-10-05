@@ -1,0 +1,75 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34525.116
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 - API", "1 - API", "{44C25579-4A19-47E5-8354-B086FE18CC29}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2 - Services", "2 - Services", "{303D2E34-C25C-4ABC-9B22-7A2E250A081D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3 - Domain", "3 - Domain", "{B03F505F-882A-4441-9A70-309F0148501D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4 - Repositories", "4 - Repositories", "{BD320AA9-7A81-44AC-B7DE-EFD6E33DA012}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5 - Data", "5 - Data", "{602A34D5-76D2-456A-9754-6A96AD9D910F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "6 - ConsoleTest", "6 - ConsoleTest", "{CB62D8D4-6236-402D-ABBE-1D6A68DAD323}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CookingCompassAPI.ConsoleTest", "CookingCompassAPI.ConsoleTest\CookingCompassAPI.ConsoleTest.csproj", "{6FB62216-131B-438A-B300-F0FABD4A081E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CookingCompassAPI.Repositories", "CookingCompassAPI.Repositories\CookingCompassAPI.Repositories.csproj", "{ACA609F0-1963-42F5-BE84-C9AC7CA01ECC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CookingCompassAPI.Data", "CookingCompassAPI.Data\CookingCompassAPI.Data.csproj", "{B92719B6-D5CC-40B0-ADC9-076B20EEC78B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CookingCompassAPI.Domain", "CookingCompassAPI.Domain\CookingCompassAPI.Domain.csproj", "{99A21EF1-CD5E-41EB-886D-FCFB2BFFFC74}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CookingCompassAPI.Services", "CookingCompassAPI.Services\CookingCompassAPI.Services.csproj", "{DEC0DF17-6865-496D-8247-04832D06AA73}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CookingCompassAPI", "CookingCompassAPI\CookingCompassAPI.csproj", "{4E985A41-22C8-46F5-B8E0-DDADA335C284}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6FB62216-131B-438A-B300-F0FABD4A081E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FB62216-131B-438A-B300-F0FABD4A081E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FB62216-131B-438A-B300-F0FABD4A081E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FB62216-131B-438A-B300-F0FABD4A081E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACA609F0-1963-42F5-BE84-C9AC7CA01ECC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACA609F0-1963-42F5-BE84-C9AC7CA01ECC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACA609F0-1963-42F5-BE84-C9AC7CA01ECC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACA609F0-1963-42F5-BE84-C9AC7CA01ECC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B92719B6-D5CC-40B0-ADC9-076B20EEC78B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B92719B6-D5CC-40B0-ADC9-076B20EEC78B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B92719B6-D5CC-40B0-ADC9-076B20EEC78B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B92719B6-D5CC-40B0-ADC9-076B20EEC78B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99A21EF1-CD5E-41EB-886D-FCFB2BFFFC74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99A21EF1-CD5E-41EB-886D-FCFB2BFFFC74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99A21EF1-CD5E-41EB-886D-FCFB2BFFFC74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99A21EF1-CD5E-41EB-886D-FCFB2BFFFC74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEC0DF17-6865-496D-8247-04832D06AA73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEC0DF17-6865-496D-8247-04832D06AA73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEC0DF17-6865-496D-8247-04832D06AA73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEC0DF17-6865-496D-8247-04832D06AA73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E985A41-22C8-46F5-B8E0-DDADA335C284}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E985A41-22C8-46F5-B8E0-DDADA335C284}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E985A41-22C8-46F5-B8E0-DDADA335C284}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E985A41-22C8-46F5-B8E0-DDADA335C284}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6FB62216-131B-438A-B300-F0FABD4A081E} = {CB62D8D4-6236-402D-ABBE-1D6A68DAD323}
+		{ACA609F0-1963-42F5-BE84-C9AC7CA01ECC} = {BD320AA9-7A81-44AC-B7DE-EFD6E33DA012}
+		{B92719B6-D5CC-40B0-ADC9-076B20EEC78B} = {602A34D5-76D2-456A-9754-6A96AD9D910F}
+		{99A21EF1-CD5E-41EB-886D-FCFB2BFFFC74} = {B03F505F-882A-4441-9A70-309F0148501D}
+		{DEC0DF17-6865-496D-8247-04832D06AA73} = {303D2E34-C25C-4ABC-9B22-7A2E250A081D}
+		{4E985A41-22C8-46F5-B8E0-DDADA335C284} = {44C25579-4A19-47E5-8354-B086FE18CC29}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A3A04427-F4D6-4DA4-8718-4D8A07AABCCD}
+	EndGlobalSection
+EndGlobal

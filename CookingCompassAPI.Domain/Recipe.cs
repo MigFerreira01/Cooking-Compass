@@ -9,7 +9,7 @@ namespace CookingCompassAPI.Domain
 
         public string Name { get; set; }
 
-        //public List<Ingredient> Ingredients { get; set; } 
+        public ICollection <Ingredient> Ingredients { get; set; } 
 
         //public string Description { get; set; }
 

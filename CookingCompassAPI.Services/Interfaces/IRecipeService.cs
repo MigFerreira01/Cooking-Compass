@@ -20,7 +20,7 @@ namespace CookingCompassAPI.Services.Interfaces
 
         //List<Recipe> GetByIngredient(List<string> ingredietn);
 
-        Recipe SaveRecipe (Recipe recipe);
+        Recipe SaveRecipe (Recipe recipe, List<Ingredient> ingredients);
 
         void RemoveRecipe (int id);
     }

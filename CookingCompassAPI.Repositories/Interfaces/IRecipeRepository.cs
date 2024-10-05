@@ -14,7 +14,7 @@ namespace CookingCompassAPI.Repositories.Interfaces
 
         Recipe GetById(int id);
 
-        Recipe Add(Recipe recipe);
+        Recipe AddRecipeWithIngredient(Recipe recipe, List<Ingredient> ingredients);
 
         bool GetAny(int id);
 
@@ -24,7 +24,9 @@ namespace CookingCompassAPI.Repositories.Interfaces
 
         //List<Recipe> GetByIngredient (List<string> ingredients);
 
-        Recipe Update(Recipe recipe);
+        void UpdateIngredientsForRecipe(int recipeId, List<Ingredient> updatedIngredients);
+
+        Recipe Update (Recipe recipe);
 
         void Remove(Recipe recipe);
 

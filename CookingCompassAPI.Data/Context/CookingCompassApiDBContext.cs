@@ -28,7 +28,7 @@ namespace CookingCompassAPI.Data.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-           
+
         }
 
     }

@@ -52,12 +52,22 @@ namespace CookingCompassAPI.Controllers
         }
 
         [HttpPost]
-
-        public Recipe SaveRecipe (Recipe recipe)
+        public IActionResult SaveRecipe([FromBody] RecipeWithIngredientsDto recipeWithIngredients)
         {
-            return _recipeService.SaveRecipe(recipe);
-        }
+            if (recipeWithIngredients == null || recipeWithIngredients.Recipe == null || recipeWithIngredients.Ingredients == null)
+            {
+                return BadRequest("Invalid recipe or ingredients data.");
+            }
 
+            var recipe = _recipeService.SaveRecipe(recipeWithIngredients.Recipe, recipeWithIngredients.Ingredients);
+
+            if (recipe == null)
+            {
+                return StatusCode(500, "A problem occurred while saving the recipe.");
+            }
+
+            return Ok(recipe); // Return the saved recipe as a response
+        }
         [HttpDelete("{id}")]
         public void DeleteRecipe (int id) 
         {

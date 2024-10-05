@@ -48,17 +48,20 @@ namespace CookingCompassAPI.Services.Implementations
         //    return _recipeRepository.GetByIngredient(ingredients);
         //}
 
-        public Recipe SaveRecipe (Recipe recipe)
+        public Recipe SaveRecipe (Recipe recipe, List<Ingredient> ingredients)
         {
             bool recipeExists = _recipeRepository.GetAny(recipe.Id);
 
             if (!recipeExists)
             {
-              recipe = _recipeRepository.Add(recipe);
+                recipe = _recipeRepository.AddRecipeWithIngredient(recipe, ingredients);
             }
             else
             {
                 recipe = _recipeRepository.Update(recipe);
+
+
+                _recipeRepository.UpdateIngredientsForRecipe(recipe.Id, ingredients);
             }
 
             _cookingApiDBContext.SaveChanges();

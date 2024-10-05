@@ -74,6 +74,8 @@ namespace CookingCompassAPI.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("RecipeId");
+
                     b.ToTable("Ingredients");
                 });
 
@@ -176,6 +178,22 @@ namespace CookingCompassAPI.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Author");
+                });
+
+            modelBuilder.Entity("CookingCompassAPI.Domain.Ingredient", b =>
+                {
+                    b.HasOne("CookingCompassAPI.Domain.Recipe", "Recipe")
+                        .WithMany("Ingredients")
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Recipe");
+                });
+
+            modelBuilder.Entity("CookingCompassAPI.Domain.Recipe", b =>
+                {
+                    b.Navigation("Ingredients");
                 });
 #pragma warning restore 612, 618
         }

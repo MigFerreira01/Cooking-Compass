@@ -5,7 +5,7 @@
 namespace CookingCompassAPI.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class fix4 : Migration
+    public partial class Tes : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

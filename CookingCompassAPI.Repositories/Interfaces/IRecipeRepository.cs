@@ -14,19 +14,7 @@ namespace CookingCompassAPI.Repositories.Interfaces
 
         Recipe GetById(int id);
 
-        Recipe AddRecipeWithIngredient(Recipe recipe, List<Ingredient> ingredients);
-
         bool GetAny(int id);
-
-        //List<Recipe> GetByCategory (string category);
-
-        //List<Recipe> GetByDifficulty(string difficultyLevel);
-
-        //List<Recipe> GetByIngredient (List<string> ingredients);
-
-        void UpdateIngredientsForRecipe(int recipeId, List<Ingredient> updatedIngredients);
-
-        Recipe Update (Recipe recipe);
 
         void Remove(Recipe recipe);
 

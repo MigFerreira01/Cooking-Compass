@@ -9,23 +9,21 @@ namespace CookingCompassAPI.Domain
 
         public string Name { get; set; }
 
-        public ICollection <Ingredient> Ingredients { get; set; } 
+        public List <RecipeIngredient> RecipeIngredients { get; set; }
 
-        //public string Description { get; set; }
+        public string Description { get; set; }
 
-        //public User Author { get; set; }
+        public User Author { get; set; }
 
-        //public RecipeCategory Category { get; set; }
+        public RecipeCategory Category { get; set; }
 
-        //public DifficultyLevel Difficulty { get; set; }
+        public DifficultyLevel Difficulty { get; set; }
 
-        //public ApprovalStatus Status { get; set; }
+        public ApprovalStatus Status { get; set; }
 
-        //public List<Comment> Comments { get; set; }
+        public List<Comment> Comments { get; set; }
 
-        //public double AverageRating { get; set; }
-
-        //public int Duration { get; set; }
+        public int Duration { get; set; }
 
     }
 }

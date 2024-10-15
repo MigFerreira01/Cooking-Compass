@@ -59,7 +59,20 @@ namespace CookingCompassAPI.Controllers
                 return BadRequest("Invalid recipe or ingredients data.");
             }
 
-            var recipe = _recipeService.SaveRecipe(recipeWithIngredients.Recipe, recipeWithIngredients.Ingredients);
+            var recipe = new Recipe
+            {
+                Id = recipeWithIngredients.Recipe.Id,
+                Name = recipeWithIngredients.Recipe.Name,
+                Ingredients = recipeWithIngredients.Ingredients.Select(ingredient => new Ingredient
+                {
+                    Id = ingredient.Id,
+                    Name = ingredient.Name,
+                    Quantity = ingredient.Quantity,
+                    Unit = ingredient.Unit,
+                }).ToList()
+            };
+
+            var savedRecipe = _recipeService.SaveRecipe(recipe, recipe.Ingredients.ToList());
 
             if (recipe == null)
             {
@@ -68,6 +81,8 @@ namespace CookingCompassAPI.Controllers
 
             return Ok(recipe); // Return the saved recipe as a response
         }
+
+
         [HttpDelete("{id}")]
         public void DeleteRecipe (int id) 
         {

@@ -1,5 +1,6 @@
 ﻿using CookingCompassAPI.Data.Context;
 using CookingCompassAPI.Domain;
+using CookingCompassAPI.Domain.DTO_s;
 using CookingCompassAPI.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -22,19 +23,22 @@ namespace CookingCompassAPI.Services.Implementations
             _ingredientRepository = ingredientRepository;
         }
 
-        public List<Ingredient> GetAll()
+        public List<IngredientDTO> GetAll()
         {
-            return _ingredientRepository.GetAll();
+            var ingredients = _ingredientRepository.GetAll();
+            return ingredients.Select(TranslateIngredient.MapIngredient).ToList();
         }
 
-        public Ingredient GetById (int id) 
+        public IngredientDTO GetById (int id) 
         {
-            return _ingredientRepository.GetById(id);
+            var ingredient = _ingredientRepository.GetById(id);
+            return ingredient != null ? TranslateIngredient.MapIngredient(ingredient) : null;
         }
 
 
-        public Ingredient SaveIngredient (Ingredient ingredient)
+        public IngredientDTO SaveIngredient (IngredientDTO ingredientDTO)
         {
+            var ingredient = TranslateIngredient.MapIngredient(ingredientDTO);
             bool ingredientExists = _ingredientRepository.GetAny(ingredient.Id);
 
             if (!ingredientExists)
@@ -43,22 +47,46 @@ namespace CookingCompassAPI.Services.Implementations
             }
             else
             {
-                ingredient = _ingredientRepository.Update(ingredient);
+                var existingIngredient = _ingredientRepository.GetById
             }
 
-            return ingredient;
+            return TranslateIngredient.MapIngredient(ingredient);
         }
 
         public void RemoveIngredient (int id)
         {
-            Ingredient ingredientResult = _ingredientRepository.GetById(id);
+            var ingredient = _ingredientRepository.GetById(id);
 
-            if (ingredientResult != null)
+            if (ingredient != null)
             {
-                _ingredientRepository.Remove(ingredientResult);
+                _ingredientRepository.Remove(ingredient);
 
                 _cookingApiDBContext.SaveChanges();
             }
+        }
+
+    }
+
+    public static class TranslateIngredient
+    {
+
+        public static Ingredient MapIngredient (IngredientDTO ingredientDTO)
+        {
+            return new Ingredient
+            {
+                Id = ingredientDTO.IngredientId,
+                Name = ingredientDTO.Name,
+                RecipeIngredients = new List<RecipeIngredient>()
+            };
+        }
+
+        public static IngredientDTO MapIngredient(Ingredient ingredient)
+        {
+            return new IngredientDTO
+            {
+                IngredientId = ingredient.Id,
+                Name = ingredient.Name
+            };
         }
 
     }

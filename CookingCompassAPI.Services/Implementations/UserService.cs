@@ -1,5 +1,6 @@
 ﻿using CookingCompassAPI.Data.Context;
 using CookingCompassAPI.Domain;
+using CookingCompassAPI.Repositories.Implementations;
 using CookingCompassAPI.Repositories.Interfaces;
 using CookingCompassAPI.Services.Interfaces;
 using System;
@@ -33,6 +34,16 @@ namespace CookingCompassAPI.Services.Implementations
             return _userRepository.GetById(id);
         }
 
+        public User GetByUsername (string username) 
+        {
+            var user = _userRepository.GetByUsername(username);
+            if (user == null)
+            {
+                throw new ArgumentException($"User '{username}' not found");
+            }
+
+            return user;
+        }
 
         public User SaveUser (User user)
         {

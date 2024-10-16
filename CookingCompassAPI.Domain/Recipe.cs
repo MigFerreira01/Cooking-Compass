@@ -15,7 +15,7 @@ namespace CookingCompassAPI.Domain
 
         public User Author { get; set; }
 
-        public RecipeCategory Category { get; set; }
+        public Category Category { get; set; }
 
         public DifficultyLevel Difficulty { get; set; }
 

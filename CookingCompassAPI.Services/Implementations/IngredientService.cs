@@ -47,7 +47,7 @@ namespace CookingCompassAPI.Services.Implementations
             }
             else
             {
-                var existingIngredient = _ingredientRepository.GetById
+                var existingIngredient = _ingredientRepository.GetById;
             }
 
             return TranslateIngredient.MapIngredient(ingredient);
@@ -80,7 +80,7 @@ namespace CookingCompassAPI.Services.Implementations
             };
         }
 
-        public static IngredientDTO MapIngredient(Ingredient ingredient)
+        public static IngredientDTO MapIngredientDTO (Ingredient ingredient)
         {
             return new IngredientDTO
             {

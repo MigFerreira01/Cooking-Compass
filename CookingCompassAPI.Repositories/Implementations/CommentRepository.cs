@@ -9,11 +9,13 @@ namespace CookingCompassAPI.Repositories.Implementations
     {
 
         private readonly DbSet<Comment> _dbSet;
+        private readonly CookingCompassApiDBContext _dbContext;
 
 
         public CommentRepository(CookingCompassApiDBContext cookingCompassApiDBContext)
         {
             _dbSet = cookingCompassApiDBContext.Set<Comment>();
+            _dbContext = cookingCompassApiDBContext;
         }
 
         public List<Comment> GetAll()
@@ -35,7 +37,7 @@ namespace CookingCompassAPI.Repositories.Implementations
         {
             
             _dbSet.Add(comment);
-
+            _dbContext.SaveChanges();
             return comment;
 
         }
@@ -44,7 +46,7 @@ namespace CookingCompassAPI.Repositories.Implementations
         {
             
             _dbSet.Update(comment);
-
+            _dbContext.SaveChanges();
             return comment;
 
         }
@@ -52,6 +54,7 @@ namespace CookingCompassAPI.Repositories.Implementations
         public void Remove (Comment comment)
         {
             _dbSet.Remove(comment);
+            _dbContext.SaveChanges();
         }
     }
 }

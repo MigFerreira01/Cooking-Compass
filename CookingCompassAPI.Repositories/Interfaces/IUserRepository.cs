@@ -16,6 +16,8 @@ namespace CookingCompassAPI.Repositories.Interfaces
 
         User Add (User user);
 
+        User GetByUsername (string username);
+
         bool GetAny (int id);
 
         User Update (User user);    

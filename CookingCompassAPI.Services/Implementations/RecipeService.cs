@@ -1,5 +1,7 @@
 ﻿using CookingCompassAPI.Data.Context;
 using CookingCompassAPI.Domain;
+using CookingCompassAPI.Domain.DAL;
+using CookingCompassAPI.Repositories.Implementations;
 using CookingCompassAPI.Repositories.Interfaces;
 using CookingCompassAPI.Services.Interfaces;
 using System;
@@ -23,51 +25,13 @@ namespace CookingCompassAPI.Services.Implementations
             _recipeRepository = recipeRepository;
         }
 
-        public List<Recipe> GetAll()
+        public List<RecipeDTO> GetAll()
         {
-            return _recipeRepository.GetAll();
+            
+            var recipies = _recipeRepository.GetAll();
+            return recipies.Select();
         }
 
-        public Recipe GetById (int id) 
-        {
-            return _recipeRepository.GetById(id);
-        }
-
-        //public List<Recipe> GetByCategory(string category)
-        //{
-        //    return _recipeRepository.GetByCategory(category);
-        //}
-
-        //public List<Recipe> GetByDifficulty(string difficultyLevel)
-        //{
-        //    return _recipeRepository.GetByDifficulty(difficultyLevel);
-        //}
-
-        //public List<Recipe> GetByIngredient(List<string> ingredients)
-        //{
-        //    return _recipeRepository.GetByIngredient(ingredients);
-        //}
-
-        public Recipe SaveRecipe (Recipe recipe, List<Ingredient> ingredients)
-        {
-            bool recipeExists = _recipeRepository.GetAny(recipe.Id);
-
-            if (!recipeExists)
-            {
-                recipe = _recipeRepository.AddRecipeWithIngredient(recipe, ingredients);
-            }
-            else
-            {
-                recipe = _recipeRepository.Update(recipe);
-
-
-                _recipeRepository.UpdateIngredientsForRecipe(recipe.Id, ingredients);
-            }
-
-            _cookingApiDBContext.SaveChanges();
-
-            return recipe;
-        }
 
         public void RemoveRecipe (int id)
         {
@@ -76,11 +40,64 @@ namespace CookingCompassAPI.Services.Implementations
             if (recipeResult != null)
             {
                 _recipeRepository.Remove(recipeResult);
-
-                _cookingApiDBContext.SaveChanges();
             }
         }
 
+    }
+
+    public class TranslateRecipe
+    {
+        private IUserService _userService;
+        private ICategoryService _categoryService;
+
+        public static Recipe Recipe MapRecipe (RecipeDTO recipeDTO)
+        {
+            return new Recipe
+            {
+                Id = recipeDTO.Id,
+                Name = recipeDTO.Name,
+                Description = recipeDTO.Description,
+                Category = recipeDTO.Category,
+                Duration = recipeDTO.Duration,
+                RecipeIngredients = recipeDTO.Ingredients.Select( i => new RecipeIngredient
+                {
+                    Ingredient = TranslateIngredient.MapIngredient(i),
+
+                }).ToList(),
+                Author = _userService.GetByUsername(recipeDTO.Author),
+                Difficulty = GetDifficultyLevelByString(recipeDTO.Difficulty),
+                Category = _categoryService.GetByName(recipeDTO.Category),
+                Status = GetApprovalStatusByString(recipeDTO.Status),
+                Comments = recipeDTO.Comments.Select(comment => new Comment
+                {
+                    Id = comment.Id,
+                    Author = _userService.GetByUsername(comment.Author),
+                    Content = comment.Content,
+                    CreatedAt = comment.CreatedAt,
+
+                }).ToList(),
+
+            };
+        }
+
+        private DifficultyLevel GetDifficultyLevelByString (string difficulty)
+        {
+            if (Enum.TryParse<DifficultyLevel>(difficulty, out var difficultyLevel)) 
+            {
+                return difficultyLevel;
+            }
+            throw new ArgumentException($"Invalid difficulty level '{difficulty}'");
+        }
+
+        private ApprovalStatus GetApprovalStatusByString(string status)
+        {
+
+            if (Enum.TryParse<ApprovalStatus>(status, out var approvalStatus))
+            {
+                return approvalStatus;
+            }
+            throw new ArgumentException($"Invalid approval status '{status}'");
+        }
     }
 
 

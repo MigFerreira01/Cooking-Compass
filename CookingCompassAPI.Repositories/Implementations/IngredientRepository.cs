@@ -9,11 +9,13 @@ namespace CookingCompassAPI.Repositories.Implementations
     {
 
         private readonly DbSet<Ingredient> _dbSet;
+        private readonly CookingCompassApiDBContext _dbContext;
 
 
         public IngredientRepository(CookingCompassApiDBContext cookingCompassApiDBContext)
         {
             _dbSet = cookingCompassApiDBContext.Set<Ingredient>();
+            _dbContext = cookingCompassApiDBContext;
         }
 
         public List<Ingredient> GetAll()
@@ -35,7 +37,7 @@ namespace CookingCompassAPI.Repositories.Implementations
         {
             
             _dbSet.Add(ingredient);
-
+            _dbContext.SaveChanges();
             return ingredient;
 
         }
@@ -44,7 +46,7 @@ namespace CookingCompassAPI.Repositories.Implementations
         {
             
             _dbSet.Update(ingredient);
-
+            _dbContext.SaveChanges();
             return ingredient;
 
         }
@@ -52,6 +54,7 @@ namespace CookingCompassAPI.Repositories.Implementations
         public void Remove (Ingredient ingredient)
         {
             _dbSet.Remove(ingredient);
+            _dbContext.SaveChanges();
         }
     }
 }

@@ -9,7 +9,7 @@ namespace CookingCompassAPI.Repositories.Implementations
     public class RecipeRepository : IRecipeRepository
     {
 
-        private readonly DbSet<Recipe> _recipeDbSet;
+        private readonly DbSet<Recipe> _dbSet;
         private readonly DbSet<Ingredient> _ingredientDbSet;
         private readonly CookingCompassApiDBContext _dbContext;
 
@@ -18,29 +18,43 @@ namespace CookingCompassAPI.Repositories.Implementations
         {
             _dbContext = cookingCompassApiDBContext;
 
-            _recipeDbSet = _dbContext.Set<Recipe>();
+            _dbSet = _dbContext.Set<Recipe>();
           
             _ingredientDbSet = _dbContext.Set<Ingredient>();
         }
 
         public List<Recipe> GetAll()
         {
-           return _recipeDbSet.ToList();
+           return _dbSet.ToList();
         }
 
         public Recipe GetById(int id)
         {
-            return _recipeDbSet.FirstOrDefault(recipe => recipe.Id == id);
+            return _dbSet.FirstOrDefault(recipe => recipe.Id == id);
         }
 
         public bool GetAny(int id)
         {
-            return _recipeDbSet.Any(recipe => recipe.Id == id);
+            return _dbSet.Any(recipe => recipe.Id == id);
+        }
+
+        public Recipe Add (Recipe recipe)
+        {
+            _dbSet.Add(recipe);
+            _dbContext.SaveChanges();
+            return recipe;
+        }
+
+        public Recipe Update (Recipe recipe)
+        {
+            _dbSet.Update(recipe);
+            _dbContext.SaveChanges();
+            return recipe;
         }
 
         public void Remove(Recipe recipe)
         {
-            _recipeDbSet.Remove(recipe);
+            _dbSet.Remove(recipe);
             _dbContext.SaveChanges();
         }
     }

@@ -17,5 +17,7 @@ namespace CookingCompassAPI.Services.Interfaces
         User SaveUser (User user);
 
         void RemoveUser (int id);
+
+        User GetByUsername (string username);
     }
 }

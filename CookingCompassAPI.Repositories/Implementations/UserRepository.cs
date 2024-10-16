@@ -9,11 +9,13 @@ namespace CookingCompassAPI.Repositories.Implementations
     {
 
         private readonly DbSet<User> _dbSet;
+        private readonly CookingCompassApiDBContext _dbContext;
 
 
         public UserRepository(CookingCompassApiDBContext cookingCompassApiDBContext)
         {
             _dbSet = cookingCompassApiDBContext.Set<User>();
+            _dbContext = cookingCompassApiDBContext;
         }
 
         public List<User> GetAll()
@@ -26,6 +28,11 @@ namespace CookingCompassAPI.Repositories.Implementations
             return _dbSet.FirstOrDefault(user => user.Id == id);
         }
 
+        public User GetByUsername(string username)
+        {
+            return _dbSet.FirstOrDefault(user => user.Name == username);
+        }
+
         public bool GetAny(int id) 
         {
             return _dbSet.Any(user => user.Id == id);
@@ -36,6 +43,8 @@ namespace CookingCompassAPI.Repositories.Implementations
             
             _dbSet.Add(user);
 
+            _dbContext.SaveChanges();
+
             return user;
 
         }
@@ -45,6 +54,8 @@ namespace CookingCompassAPI.Repositories.Implementations
             
             _dbSet.Update(user);
 
+            _dbContext.SaveChanges();
+
             return user;
 
         }
@@ -52,6 +63,7 @@ namespace CookingCompassAPI.Repositories.Implementations
         public void Remove (User user)
         {
             _dbSet.Remove(user);
+            _dbContext.SaveChanges();
         }
     }
 }

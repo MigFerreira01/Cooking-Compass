@@ -1,4 +1,5 @@
 ﻿using CookingCompassAPI.Domain;
+using CookingCompassAPI.Domain.DTO_s;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +11,9 @@ namespace CookingCompassAPI.Services.Interfaces
     public interface IIngredientService
     {
 
-        List<Ingredient> GetAll();
+        List<IngredientDTO> GetAll();
 
-        Ingredient GetById (int id);
-
-        Ingredient SaveIngredient (Ingredient ingredient);
+        void SaveIngredient (IngredientDTO ingredientDTO);
 
         void RemoveIngredient (int id);
     }

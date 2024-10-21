@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CookingCompassAPI.Data.Migrations
 {
     [DbContext(typeof(CookingCompassApiDBContext))]
-    [Migration("20241005160743_Tes")]
-    partial class Tes
+    [Migration("20241019145319_New")]
+    partial class New
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,19 +36,21 @@ namespace CookingCompassAPI.Data.Migrations
                     b.Property<int>("AuthorId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CommentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("RecipeId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Text")
+                    b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("RecipeId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
+
+                    b.HasIndex("RecipeId");
 
                     b.ToTable("Comments");
                 });
@@ -65,19 +67,7 @@ namespace CookingCompassAPI.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RecipeId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Unit")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("RecipeId");
 
                     b.ToTable("Ingredients");
                 });
@@ -112,30 +102,56 @@ namespace CookingCompassAPI.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Difficulty")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
 
                     b.ToTable("Recipes");
                 });
 
-            modelBuilder.Entity("CookingCompassAPI.Domain.RecipeCategory", b =>
+            modelBuilder.Entity("CookingCompassAPI.Domain.RecipeIngredient", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("RecipeId")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<int>("IngredientId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Name")
+                    b.Property<double>("Quantity")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Unit")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.HasKey("RecipeId", "IngredientId");
 
-                    b.ToTable("RecipeCategories");
+                    b.HasIndex("IngredientId");
+
+                    b.ToTable("RecipeIngredients");
                 });
 
             modelBuilder.Entity("CookingCompassAPI.Domain.User", b =>
@@ -180,23 +196,53 @@ namespace CookingCompassAPI.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("CookingCompassAPI.Domain.Recipe", null)
+                        .WithMany("Comments")
+                        .HasForeignKey("RecipeId");
+
                     b.Navigation("Author");
-                });
-
-            modelBuilder.Entity("CookingCompassAPI.Domain.Ingredient", b =>
-                {
-                    b.HasOne("CookingCompassAPI.Domain.Recipe", "Recipe")
-                        .WithMany("Ingredients")
-                        .HasForeignKey("RecipeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Recipe");
                 });
 
             modelBuilder.Entity("CookingCompassAPI.Domain.Recipe", b =>
                 {
-                    b.Navigation("Ingredients");
+                    b.HasOne("CookingCompassAPI.Domain.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+                });
+
+            modelBuilder.Entity("CookingCompassAPI.Domain.RecipeIngredient", b =>
+                {
+                    b.HasOne("CookingCompassAPI.Domain.Ingredient", "Ingredient")
+                        .WithMany("RecipeIngredients")
+                        .HasForeignKey("IngredientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CookingCompassAPI.Domain.Recipe", "Recipe")
+                        .WithMany("RecipeIngredients")
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ingredient");
+
+                    b.Navigation("Recipe");
+                });
+
+            modelBuilder.Entity("CookingCompassAPI.Domain.Ingredient", b =>
+                {
+                    b.Navigation("RecipeIngredients");
+                });
+
+            modelBuilder.Entity("CookingCompassAPI.Domain.Recipe", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("RecipeIngredients");
                 });
 #pragma warning restore 612, 618
         }

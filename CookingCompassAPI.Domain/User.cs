@@ -1,4 +1,6 @@
-﻿namespace CookingCompassAPI.Domain
+﻿using CookingCompassAPI.Domain.DTO_s;
+
+namespace CookingCompassAPI.Domain
 {
     public class User
     {
@@ -16,5 +18,7 @@
         public bool IsBlocked { get; set;}
 
         public DateTime RegistrationDate { get; set; }
+
+        public List<Recipe> Recipes { get; set; }
     }
 }

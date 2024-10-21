@@ -1,4 +1,5 @@
 ﻿using CookingCompassAPI.Domain;
+using CookingCompassAPI.Domain.DTO_s;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,14 +11,18 @@ namespace CookingCompassAPI.Services.Interfaces
     public interface IUserService
     {
 
-        List<User> GetAll();
+        List<UserDTO> GetAll();
 
-        User GetById(int id);
+        UserDTO GetById(int id);
 
-        User SaveUser (User user);
+        void SaveUser (UserDTO userDTO);
 
         void RemoveUser (int id);
 
+        bool UserExists (string username); 
+
         User GetByUsername (string username);
+
+        User GetUserWithRecipes (string username);
     }
 }

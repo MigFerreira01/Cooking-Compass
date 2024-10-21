@@ -11,7 +11,7 @@ namespace CookingCompassAPI.Domain.DTO_s
 
         public int Id { get; set; }
 
-        public string Author { get; set; }
+        public string User { get; set; }
 
         public string Content { get; set; }
 

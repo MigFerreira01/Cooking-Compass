@@ -1,4 +1,5 @@
 ﻿using CookingCompassAPI.Domain;
+using CookingCompassAPI.Domain.DTO_s;
 using CookingCompassAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,24 +18,31 @@ namespace CookingCompassAPI.Controllers
 
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("userId/{id}")]
 
-        public User GetById (int id) 
+        public UserDTO GetById (int id) 
         {
             return _userService.GetById(id);
         }
 
+        [HttpGet("username/{username}")]
+
+        public User GetUserWithRecipes (string username)
+        {
+            return _userService.GetUserWithRecipes(username);
+        }
+
         [HttpGet]
-        public List<User> GetAll()
+        public List<UserDTO> GetAll()
         {
             return _userService.GetAll();
         }
 
         [HttpPost]
 
-        public User SaveUser (User user)
+        public void SaveUser (UserDTO userDTO)
         {
-            return _userService.SaveUser(user);
+            _userService.SaveUser(userDTO);
         }
 
         [HttpDelete("{id}")]

@@ -28,9 +28,31 @@ namespace CookingCompassAPI.Repositories.Implementations
             return _dbSet.FirstOrDefault(user => user.Id == id);
         }
 
+        public User GetUserWithRecipes(int id)
+        {
+            using (var dbContext = _dbContext) 
+            {
+                var user = dbContext.Users
+                    .Include(user => user.Recipes)
+                    .FirstOrDefault(u => u.Id == id);
+
+                if (user == null)
+                {
+                    throw new KeyNotFoundException($"User with ID {id} not found.");
+                }
+
+                return user; 
+            }
+        }
+
+        public bool UserExists(string username) 
+        {
+            return _dbSet.Any(user => user.Name.Equals(username));
+        }
+
         public User GetByUsername(string username)
         {
-            return _dbSet.FirstOrDefault(user => user.Name == username);
+            return _dbContext.Users.SingleOrDefault(user => user.Name == username);
         }
 
         public bool GetAny(int id) 

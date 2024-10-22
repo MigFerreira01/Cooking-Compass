@@ -24,4 +24,5 @@ namespace CookingCompassAPI.ConsoleTest
             return Convert.ToBase64String(key); // Convert the byte array to a Base64 string
         }
     }
+}
  

@@ -1,5 +1,6 @@
 ﻿using CookingCompassAPI.Domain.DTO_s;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 
 namespace CookingCompassAPI.Domain
 {
@@ -12,7 +13,7 @@ namespace CookingCompassAPI.Domain
 
         public string Email { get; set; }
 
-        public string Password { get; set; }
+        public string PasswordHash { get; set; }
 
         public bool IsAdmin { get; set; }
 

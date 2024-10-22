@@ -32,7 +32,6 @@ namespace CookingCompassAPI.Services.Translates
                 Id = userDTO.Id, 
                 Name = userDTO.Name,
                 Email = userDTO.Email,
-                Password = userDTO.Password, 
                 IsAdmin = userDTO.IsAdmin,
                 IsBlocked = userDTO.IsBlocked,
                 RegistrationDate = userDTO.RegistrationDate 
@@ -53,8 +52,6 @@ namespace CookingCompassAPI.Services.Translates
                 Name = user.Name,
 
                 Email = user.Email,
-
-                Password = user.Password,
 
                 IsAdmin = user.IsAdmin,
 

@@ -1,4 +1,5 @@
-﻿using CookingCompassAPI.Domain.DTO_s;
+﻿using CookingCompassAPI.Domain;
+using CookingCompassAPI.Domain.DTO_s;
 using CookingCompassAPI.Repositories.Interfaces;
 using CookingCompassAPI.Services.Authentication.PasswordHash;
 using CookingCompassAPI.Services.Authentication.Token;
@@ -24,7 +25,7 @@ namespace CookingCompassAPI.Services.Authentication
             _passwordHasher = passwordHasher;
         }
 
-        public UserDTO Login(string email, string password)
+        public LoginResponseDTO Login(string email, string password)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
@@ -38,15 +39,20 @@ namespace CookingCompassAPI.Services.Authentication
                 throw new ArgumentException("Invalid Username or Password");
             }
 
+
+            if (user == null || !_passwordHasher.Verify(password, user.PasswordHash))
+            {
+                throw new ArgumentException("Invalid email or password.");
+            }
+
             var token = _tokenService.GenerateToken(user);
 
-            return new UserDTO
+            return new LoginResponseDTO
             {
                 Id = user.Id,
-
                 Name = user.Name,
-
-                Token = token,
+                Email = user.Email,
+                Token = token
             };
         }
     }

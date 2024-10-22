@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CookingCompassAPI.Data.Migrations
 {
     [DbContext(typeof(CookingCompassApiDBContext))]
-    [Migration("20241021190230_AddCascadeDeleteComment")]
-    partial class AddCascadeDeleteComment
+    [Migration("20241022135932_AddPasswordHash")]
+    partial class AddPasswordHash
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -176,7 +176,7 @@ namespace CookingCompassAPI.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

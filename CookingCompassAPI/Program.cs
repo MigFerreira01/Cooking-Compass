@@ -7,10 +7,12 @@ using CookingCompassAPI.Services.Authentication.Token;
 using CookingCompassAPI.Services.Implementations;
 using CookingCompassAPI.Services.Interfaces;
 using CookingCompassAPI.Services.Translates;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
-
+using System.Text;
 using System.Text.Json.Serialization;
 
 namespace CookingCompassAPI
@@ -58,14 +60,14 @@ namespace CookingCompassAPI
                         });
                 });
 
-                
+
                 builder.Services.AddScoped<CookingCompassApiDBContext>();
 
-                
+
                 builder.Services.AddScoped<IUserRepository, UserRepository>();
                 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
                 builder.Services.AddScoped<IIngredientRepository, IngredientRepository>();
-                
+
                 builder.Services.AddScoped<TranslateUser>();
 
 
@@ -77,6 +79,24 @@ namespace CookingCompassAPI
                 builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
                 builder.Services.AddScoped<ITokenService, TokenService>();
                 builder.Services.AddSingleton<ITokenService, TokenService>();
+                builder.Services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                   .AddJwtBearer(options =>
+                                {
+                                    var jwtSettings = builder.Configuration.GetSection("Jwt");
+                                    options.TokenValidationParameters = new TokenValidationParameters
+                                    {
+                                        ValidateIssuer = true,
+                                        ValidateAudience = false,
+                                        ValidateLifetime = true,
+                                        ValidateIssuerSigningKey = true,
+                                        ValidIssuer = jwtSettings["Issuer"],
+                                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]))
+                                    };
+                                });
 
                 builder.Services.AddControllers()
                     .AddJsonOptions(options =>
@@ -91,6 +111,8 @@ namespace CookingCompassAPI
 
                 app.UseHttpsRedirection();
 
+                app.UseAuthentication();
+
                 app.UseRouting();
 
                 app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
@@ -100,7 +122,7 @@ namespace CookingCompassAPI
                     endpoints.MapControllers();
                 });
 
-               
+
                 app.UseSwagger().UseSwaggerUI(options =>
                 {
                     options.SwaggerEndpoint("CookingCompassAPI/Swagger.json", "Cooking Compass");

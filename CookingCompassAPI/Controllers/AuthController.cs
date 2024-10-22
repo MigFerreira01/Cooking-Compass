@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CookingCompassAPI.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class AuthController : ControllerBase 
     {
         private readonly AuthService _authService;
@@ -18,8 +20,8 @@ namespace CookingCompassAPI.Controllers
         {
             try
             {
-                var userDTO = _authService.Login(request.Email, request.Password);
-                return Ok(userDTO);
+                var loginResponse = _authService.Login(request.Email, request.Password);
+                return Ok(loginResponse);
             }
             catch (ArgumentException ex)
             {

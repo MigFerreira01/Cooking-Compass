@@ -25,6 +25,10 @@ namespace CookingCompassAPI.Services.Authentication.Token
         public string GenerateToken(User user)
         {
 
+            var jwSettings = _configuration.GetSection("Jwt");
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwSettings["Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
             var claims = new[]
 
             {
@@ -32,15 +36,12 @@ namespace CookingCompassAPI.Services.Authentication.Token
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
             var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Issuer"],
+                issuer: jwSettings["Issuer"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(30), // Token expiration
-                signingCredentials: creds);
+                expires: DateTime.Now.AddMinutes(Convert.ToDouble(jwSettings["ExpiryMinutes"])), // Token expiration
+                signingCredentials: creds
+                );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
 

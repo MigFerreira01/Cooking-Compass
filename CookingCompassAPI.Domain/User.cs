@@ -1,4 +1,5 @@
 ﻿using CookingCompassAPI.Domain.DTO_s;
+using System.Security.Claims;
 
 namespace CookingCompassAPI.Domain
 {
@@ -20,5 +21,7 @@ namespace CookingCompassAPI.Domain
         public DateTime RegistrationDate { get; set; }
 
         public List<Recipe> Recipes { get; set; }
+
+        //public ClaimsIdentity? Username { get; set; }
     }
 }

@@ -16,6 +16,8 @@ namespace CookingCompassAPI.Repositories.Interfaces
 
         User GetUserWithRecipes (int id);
 
+        User GetByEmail (string email);
+
         User Add (User user);
 
         bool UserExists (string username);

@@ -40,6 +40,11 @@ namespace CookingCompassAPI.Data.Context
                 .HasOne(ri => ri.Ingredient)
                 .WithMany(i => i.RecipeIngredients)
                 .HasForeignKey(ri => ri.IngredientId);
+            
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.Recipe)
+                .WithMany(r => r.Comments)
+                .OnDelete(DeleteBehavior.Cascade);
 
         }
 

@@ -16,6 +16,8 @@ namespace CookingCompassAPI.Domain.DTO_s
 
         public string Password { get; set; }
 
+        public string Token { get; set; }
+
         public bool IsAdmin { get; set; }   
 
         public bool IsBlocked { get; set; }

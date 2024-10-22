@@ -1,6 +1,7 @@
 ﻿using CookingCompassAPI.Data.Context;
 using CookingCompassAPI.Domain;
 using CookingCompassAPI.Repositories.Implementations;
+using System.Security.Cryptography;
 
 namespace CookingCompassAPI.ConsoleTest
 {
@@ -8,42 +9,19 @@ namespace CookingCompassAPI.ConsoleTest
     {
         static void Main(string[] args)
         {
-            CookingCompassApiDBContext cookingCompassApiDBContext = new CookingCompassApiDBContext();
-
-            UserRepository userRepository = new UserRepository(cookingCompassApiDBContext);
-
-            PrintUsers(userRepository);
-
-            User userToInsert = new User();
-
-            Console.WriteLine("Insira um utilizador;");
-            Console.Write("Nome: ");
-            userToInsert.Name = Console.ReadLine();
-            Console.Write("Email: ");
-            userToInsert.Email = Console.ReadLine();
-            Console.Write("Password: ");
-            userToInsert.Password = Console.ReadLine();
-
-            userRepository.Add(userToInsert);
-
-            cookingCompassApiDBContext.SaveChanges();   
-
-            PrintUsers(userRepository);
-            Console.WriteLine($"Globalization Invariant Mode: {Environment.GetEnvironmentVariable("DOTNET_SYSTEM_GLOBALIZATION_INVARIANT")}");
-
+            // Generate and print a new Base64-encoded key
+            string base64Key = GenerateSecureKey();
+            Console.WriteLine("Your new Base64-encoded key is: " + base64Key);
         }
 
-        public static void PrintUsers(UserRepository userRepository)
+        public static string GenerateSecureKey(int size = 32) // Size in bytes
         {
-
-            List<User> users = userRepository.GetAll();
-
-            foreach (User user in users)
+            var key = new byte[size]; // Create a byte array of specified size
+            using (var rng = RandomNumberGenerator.Create()) // Use a secure random number generator
             {
-                Console.WriteLine(user.Name);
+                rng.GetBytes(key); // Fill the byte array with random bytes
             }
-
+            return Convert.ToBase64String(key); // Convert the byte array to a Base64 string
         }
     }
-}
  

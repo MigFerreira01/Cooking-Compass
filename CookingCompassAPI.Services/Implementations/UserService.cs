@@ -4,6 +4,7 @@ using CookingCompassAPI.Domain.DTO_s;
 using CookingCompassAPI.Repositories.Implementations;
 using CookingCompassAPI.Repositories.Interfaces;
 using CookingCompassAPI.Services.Interfaces;
+using CookingCompassAPI.Services.Translates;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -72,20 +73,28 @@ namespace CookingCompassAPI.Services.Implementations
 
         public void SaveUser (UserDTO userDTO)
         {
-            bool userExists = _userRepository.GetAny(userDTO.Id);
+            if (userDTO == null)
+            {
+                throw new ArgumentNullException(nameof(userDTO), "UserDTO cannot be null");
+            }
 
+            User user = _translateUser.MapUser(userDTO);
+            if (user == null)
+            {
+                throw new InvalidOperationException("Mapped user cannot be null");
+            }
+
+            bool userExists = _userRepository.GetAny(userDTO.Id);
             if (!userExists)
             {
-              var user = _translateUser.MapUser(userDTO);
-
-              user = _userRepository.Add(user);
+                _userRepository.Add(user);
             }
             else
             {
-                var user = _translateUser.MapUser(userDTO);
-
-                user = _userRepository.Update(user);
+                _userRepository.Update(user);
             }
+
+            _cookingCompassApiDBContext.SaveChanges();
         }
 
         public void RemoveUser (int id)
@@ -101,54 +110,5 @@ namespace CookingCompassAPI.Services.Implementations
         }
 
     }
-
-    public class TranslateUser
-    {
-        private readonly CookingCompassApiDBContext _cookingApiDBContext;
-
-        public TranslateUser(CookingCompassApiDBContext cookingApiDBContext)
-        {
-            _cookingApiDBContext = cookingApiDBContext;
-        }
-
-        public User MapUser (UserDTO userDTO)
-        {
-            if (userDTO == null)
-            {
-                throw new ArgumentNullException(nameof(userDTO));
-            }
-
-            var existingUser = _cookingApiDBContext.Users
-                  .AsNoTracking() // Prevent tracking issues
-                  .SingleOrDefault(u => u.Id == userDTO.Id);
-             return existingUser;
-        }
-
-        public UserDTO MapUserDTO (User user)
-        {
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
-            return new UserDTO
-            {
-                Id = user.Id,
-
-                Name = user.Name,
-
-                Email = user.Email,
-
-                Password = user.Password,
-
-                IsAdmin = user.IsAdmin,
-
-                IsBlocked = user.IsBlocked,
-
-                RegistrationDate = user.RegistrationDate
-            };
-        }
-    }
-
 
 }

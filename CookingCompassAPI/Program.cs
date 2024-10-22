@@ -1,8 +1,12 @@
 using CookingCompassAPI.Data.Context;
 using CookingCompassAPI.Repositories.Implementations;
 using CookingCompassAPI.Repositories.Interfaces;
+using CookingCompassAPI.Services.Authentication;
+using CookingCompassAPI.Services.Authentication.PasswordHash;
+using CookingCompassAPI.Services.Authentication.Token;
 using CookingCompassAPI.Services.Implementations;
 using CookingCompassAPI.Services.Interfaces;
+using CookingCompassAPI.Services.Translates;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -61,17 +65,18 @@ namespace CookingCompassAPI
                 builder.Services.AddScoped<IUserRepository, UserRepository>();
                 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
                 builder.Services.AddScoped<IIngredientRepository, IngredientRepository>();
-                builder.Services.AddScoped<TranslateRecipe>();
+                
                 builder.Services.AddScoped<TranslateUser>();
 
 
-
+                builder.Services.AddScoped<TranslateRecipe>();
                 builder.Services.AddScoped<IUserService, UserService>();
                 builder.Services.AddScoped<IRecipeService, RecipeService>();
-                builder.Services.AddScoped<IIngredientService, IngredientService>();    
-
-                
-                builder.Services.AddControllers();
+                builder.Services.AddScoped<IIngredientService, IngredientService>();
+                builder.Services.AddScoped<AuthService>();
+                builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
+                builder.Services.AddScoped<ITokenService, TokenService>();
+                builder.Services.AddSingleton<ITokenService, TokenService>();
 
                 builder.Services.AddControllers()
                     .AddJsonOptions(options =>

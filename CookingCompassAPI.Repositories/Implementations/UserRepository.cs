@@ -55,6 +55,11 @@ namespace CookingCompassAPI.Repositories.Implementations
             return _dbContext.Users.SingleOrDefault(user => user.Name == username);
         }
 
+        public User GetByEmail (string email)
+        {
+            return _dbContext.Users.SingleOrDefault(user => user.Email == email);
+        }
+
         public bool GetAny(int id) 
         {
             return _dbSet.Any(user => user.Id == id);

@@ -1,19 +1,14 @@
 ﻿using CookingCompassAPI.Domain.DTO_s;
+using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 
 namespace CookingCompassAPI.Domain
 {
-    public class User
+    public class User : IdentityUser<int>
     {
 
-        public int Id { get; set; }
-
         public string Name { get; set; }
-
-        public string Email { get; set; }
-
-        public string PasswordHash { get; set; }
 
         public bool IsAdmin { get; set; }
 
@@ -23,6 +18,5 @@ namespace CookingCompassAPI.Domain
 
         public List<Recipe> Recipes { get; set; }
 
-        //public ClaimsIdentity? Username { get; set; }
     }
 }

@@ -1,19 +1,13 @@
 using CookingCompassAPI.Data.Context;
+using CookingCompassAPI.Domain;
 using CookingCompassAPI.Repositories.Implementations;
 using CookingCompassAPI.Repositories.Interfaces;
-using CookingCompassAPI.Services.Authentication;
-using CookingCompassAPI.Services.Authentication.PasswordHash;
-using CookingCompassAPI.Services.Authentication.Token;
 using CookingCompassAPI.Services.Implementations;
 using CookingCompassAPI.Services.Interfaces;
 using CookingCompassAPI.Services.Translates;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Serilog;
-using System.Text;
-using System.Text.Json.Serialization;
 
 namespace CookingCompassAPI
 {
@@ -21,128 +15,79 @@ namespace CookingCompassAPI
     {
         public static void Main(string[] args)
         {
-            //ADD LOGs
-            var logDirectory = "C:/ProgramData/CookingCompassLogs/";
-            if (!Directory.Exists(logDirectory))
+            var builder = WebApplication.CreateBuilder(args);
+
+            
+            builder.Services.AddDbContext<CookingCompassApiDBContext>(options =>
+              options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            
+            builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
             {
-                Directory.CreateDirectory(logDirectory);
-                Log.Information("Created log directory: {LogDirectory}", logDirectory);
-            }
-            //CONFIG SERILOG
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.Console()
-                .WriteTo.File(Path.Combine(logDirectory, "CookingCompass.log"), rollingInterval: RollingInterval.Day)
-                .CreateLogger();
+                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = true;
+            })
+            .AddEntityFrameworkStores<CookingCompassApiDBContext>()
+            .AddDefaultTokenProviders();
 
-            try
+            // Add Swagger services
+            builder.Services.AddSwaggerGen(options =>
             {
-                Log.Information("Starting application...");
-
-                var builder = WebApplication.CreateBuilder(args);
-
-                Log.Logger = new LoggerConfiguration()
-                    .MinimumLevel.Debug()
-                    .WriteTo.Console()
-                    .WriteTo.File(Path.Combine(logDirectory, "CookingCompass.log"), rollingInterval: RollingInterval.Day)
-                    .CreateLogger();
-                builder.Host.UseSerilog();
-
-
-                builder.Services.AddSwaggerGen(options =>
+                options.SwaggerDoc("CookingCompassAPI", new OpenApiInfo()
                 {
-                    options.SwaggerDoc(
-                        "CookingCompassAPI",
-                        new OpenApiInfo()
-                        {
-                            Title = "Cooking Compass",
-                            Version = "1.0"
-                        });
+                    Title = "Cooking Compass",
+                    Version = "1.0"
                 });
+            });
 
+            
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
+            builder.Services.AddScoped<IIngredientRepository, IngredientRepository>();
+            builder.Services.AddScoped<TranslateUser>();
+            builder.Services.AddScoped<TranslateRecipe>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IRecipeService, RecipeService>();
+            builder.Services.AddScoped<IIngredientService, IngredientService>();
 
-                builder.Services.AddScoped<CookingCompassApiDBContext>();
+            builder.Services.AddScoped<UserManager<User>>();
+            builder.Services.AddScoped<SignInManager<User>>();
 
+            builder.Services.AddControllers();
 
-                builder.Services.AddScoped<IUserRepository, UserRepository>();
-                builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
-                builder.Services.AddScoped<IIngredientRepository, IngredientRepository>();
+            var app = builder.Build();
 
-                builder.Services.AddScoped<TranslateUser>();
-
-
-                builder.Services.AddScoped<TranslateRecipe>();
-                builder.Services.AddScoped<IUserService, UserService>();
-                builder.Services.AddScoped<IRecipeService, RecipeService>();
-                builder.Services.AddScoped<IIngredientService, IngredientService>();
-                builder.Services.AddScoped<AuthService>();
-                builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
-                builder.Services.AddScoped<ITokenService, TokenService>();
-                builder.Services.AddSingleton<ITokenService, TokenService>();
-                builder.Services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                   .AddJwtBearer(options =>
-                                {
-                                    var jwtSettings = builder.Configuration.GetSection("Jwt");
-                                    options.TokenValidationParameters = new TokenValidationParameters
-                                    {
-                                        ValidateIssuer = true,
-                                        ValidateAudience = false,
-                                        ValidateLifetime = true,
-                                        ValidateIssuerSigningKey = true,
-                                        ValidIssuer = jwtSettings["Issuer"],
-                                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]))
-                                    };
-                                });
-
-                builder.Services.AddControllers()
-                    .AddJsonOptions(options =>
-                    {
-
-                        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-                        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
-
-                    });
-
-                var app = builder.Build();
-
-                app.UseHttpsRedirection();
-
-                app.UseAuthentication();
-
-                app.UseRouting();
-
-                app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
-
-                app.UseEndpoints(endpoints =>
-                {
-                    endpoints.MapControllers();
-                });
-
-
-                app.UseSwagger().UseSwaggerUI(options =>
-                {
-                    options.SwaggerEndpoint("CookingCompassAPI/Swagger.json", "Cooking Compass");
-                });
-
-                app.MapControllers();
-
-                Log.Information("Application is running.");
-
-                app.Run();
-            }
-            catch (Exception ex)
+            
+            if (app.Environment.IsDevelopment())
             {
-                Log.Error(ex, "App fatal error");
+                app.UseDeveloperExceptionPage();
             }
-            finally
+            else
             {
-                Log.CloseAndFlush();
+                app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
             }
+
+            app.UseHttpsRedirection();
+            app.UseRouting();
+
+            
+            app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+            app.UseAuthorization();
+
+            
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/CookingCompassAPI/swagger.json", "Cooking Compass");
+            });
+
+            
+            app.MapControllers();
+
+            app.Run();
         }
     }
-
 }

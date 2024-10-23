@@ -30,12 +30,15 @@ namespace CookingCompassAPI.Services.Translates
             _dbContext = dBContext;
         }
 
-        public Recipe MapRecipe(RecipeDTO recipeDTO)
+        public async Task<Recipe> MapRecipeAsync (RecipeDTO recipeDTO)
         {
             if (recipeDTO == null)
             {
                 throw new ArgumentNullException(nameof(recipeDTO));
             }
+
+            var user = await _userService.GetByNameAsync(recipeDTO.User);
+
 
             return new Recipe
             {
@@ -44,16 +47,21 @@ namespace CookingCompassAPI.Services.Translates
                 Description = recipeDTO.Description ?? "No description available.",
                 Duration = recipeDTO.Duration,
                 RecipeIngredients = MapRecipeIngredients(recipeDTO.Ingredients),
-                User = _userService.GetByUsername(recipeDTO.User),
+                User = user,
                 Difficulty = GetDifficultyLevelByString(recipeDTO.Difficulty),
                 Category = GetRecipeCategoryByString(recipeDTO.Category),
                 Status = GetApprovalStatusByString(recipeDTO.Status),
-                Comments = MapComments(recipeDTO.Comments)
+                Comments = await MapCommentsAsync(recipeDTO.Comments)
             };
         }
 
         private List<RecipeIngredient> MapRecipeIngredients(IEnumerable<RecipeIngredientDTO> ingredientDTOs)
         {
+            var ingredientNames = ingredientDTOs.Select(i => i.IngredientName).Distinct().ToList();
+            var existingIngredients = _dbContext.Ingredients
+                .Where(i => ingredientNames.Contains(i.Name))
+                .ToDictionary(i => i.Name, i => i);
+
             var recipeIngredients = new List<RecipeIngredient>();
 
             foreach (var ingredientDTO in ingredientDTOs)
@@ -63,46 +71,61 @@ namespace CookingCompassAPI.Services.Translates
                     throw new ArgumentNullException(nameof(ingredientDTO), "Ingredient data cannot be null.");
                 }
 
-                var existingIngredient = _dbContext.Ingredients
-                    .AsNoTracking()
-                    .FirstOrDefault(i => i.Name == ingredientDTO.IngredientName);
-
-                if (existingIngredient == null)
+                if (!existingIngredients.TryGetValue(ingredientDTO.IngredientName, out var existingIngredient))
                 {
-                    throw new InvalidOperationException($"Ingredient '{ingredientDTO.IngredientName}' not found.");
-                }
-
-                if (!recipeIngredients.Any(ri => ri.IngredientId == existingIngredient.Id))
-                {
-                    recipeIngredients.Add(new RecipeIngredient
+                    existingIngredient = new Ingredient
                     {
-                        IngredientId = existingIngredient.Id,
-                        Quantity = ingredientDTO.Quantity,
-                        Unit = ingredientDTO.Unit,
-                    });
+                        Name = ingredientDTO.IngredientName
+                    };
+
+                    _dbContext.Ingredients.Add(existingIngredient);
+                    _dbContext.SaveChanges();
+
+                    existingIngredients[ingredientDTO.IngredientName] = existingIngredient;
                 }
+
+                recipeIngredients.Add(new RecipeIngredient
+                {
+                    IngredientId = existingIngredient.Id,
+                    Quantity = ingredientDTO.Quantity,
+                    Unit = ingredientDTO.Unit,
+                });
             }
 
             return recipeIngredients;
         }
 
-        private List<Comment> MapComments(IEnumerable<CommentDTO> commentDTOs)
+        private async Task<List<Comment>> MapCommentsAsync (IEnumerable<CommentDTO> commentDTOs)
         {
-            return commentDTOs?.Select(comment =>
+
+            var comments = new List<Comment>();
+
+            if (commentDTOs == null) return comments;
+
+            foreach (var comment in commentDTOs)
             {
                 if (comment == null)
                 {
                     throw new ArgumentNullException(nameof(comment), "Comment data cannot be null.");
                 }
 
-                return new Comment
+                var user = await _userService.GetByNameAsync(comment.User);
+
+                if (user == null)
+                {
+                    throw new ArgumentException($"User '{comment.User}' does not exist.");
+                }
+
+                comments.Add(new Comment
                 {
                     Id = comment.Id,
-                    User = _userService.GetByUsername(comment.User),
+                    User = user,
                     Content = comment.Content,
                     CreatedAt = comment.CreatedAt,
-                };
-            }).ToList() ?? new List<Comment>();
+                });
+            }
+
+            return comments;
         }
 
         public RecipeDTO MapRecipeDTO(Recipe recipe) => new RecipeDTO

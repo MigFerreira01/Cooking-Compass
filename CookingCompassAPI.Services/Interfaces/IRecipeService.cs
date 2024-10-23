@@ -11,10 +11,10 @@ namespace CookingCompassAPI.Services.Interfaces
     public interface IRecipeService
     {
 
-        List<RecipeDTO> GetAll();
+        Task<Recipe> AddRecipeAsync(RecipeDTO recipeDTO);
 
-        void AddRecipe (RecipeDTO recipeDTO);
+        Task<RecipeDTO> GetRecipeByIdAsync(int id);
 
-        void RemoveRecipe (int id);
+        Task<bool> RemoveRecipeAsync(int id);
     }
 }

@@ -1,7 +1,9 @@
 ﻿using CookingCompassAPI.Domain;
 using CookingCompassAPI.Domain.DTO_s;
 using CookingCompassAPI.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CookingCompassAPI.Controllers
 {
@@ -11,10 +13,13 @@ namespace CookingCompassAPI.Controllers
     {
         private IUserService _userService;
 
-        public UserController(IUserService userService) 
+        private readonly UserManager<User> _userManager;
+
+        public UserController(IUserService userService, UserManager<User> userManager) 
         {
             
             _userService = userService;
+            _userManager = userManager;
 
         }
 
@@ -33,16 +38,52 @@ namespace CookingCompassAPI.Controllers
         }
 
         [HttpGet]
-        public List<UserDTO> GetAll()
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            return _userService.GetAll();
+            var users = await _userService.GetUsersAsync();
+            return Ok(users);
         }
 
-        [HttpPost]
-
-        public void SaveUser (UserDTO userDTO)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(UserRegistrationDTO userRegistrationDTO)
         {
-            _userService.SaveUser(userDTO);
+            if (ModelState.IsValid)
+            {
+                var result = await _userService.RegisterUserAsync(userRegistrationDTO);
+                if (result.Succeeded)
+                {
+                    return Ok();
+                }
+                return BadRequest(result.Errors);
+            }
+
+            return BadRequest(ModelState);
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(LoginResponseDTO loginResponseDTO)
+        {
+
+            if (ModelState.IsValid)
+            {
+                var result = await _userService.LoginUserAsync(loginResponseDTO);
+
+                if (result.Succeeded)
+                {
+                    return Ok("Login successful!"); 
+                }
+                else if (result.IsLockedOut)
+                {
+                    return BadRequest("Your account is locked."); 
+                }
+                else
+                {
+                    return Unauthorized("Invalid login attempt."); 
+                }
+            }
+
+            return BadRequest(ModelState); 
+
         }
 
         [HttpDelete("{id}")]

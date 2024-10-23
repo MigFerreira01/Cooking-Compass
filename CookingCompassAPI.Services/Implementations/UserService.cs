@@ -5,6 +5,7 @@ using CookingCompassAPI.Repositories.Implementations;
 using CookingCompassAPI.Repositories.Interfaces;
 using CookingCompassAPI.Services.Interfaces;
 using CookingCompassAPI.Services.Translates;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -23,19 +24,33 @@ namespace CookingCompassAPI.Services.Implementations
 
         private readonly TranslateUser _translateUser;
 
-        public UserService (CookingCompassApiDBContext cookingApiDBContext, IUserRepository userRepository, TranslateUser translateUser)
+        private readonly UserManager<User> _userManager;
+
+        private readonly SignInManager<User> _signInManager;
+
+        public UserService (CookingCompassApiDBContext cookingApiDBContext, IUserRepository userRepository, TranslateUser translateUser, UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _cookingCompassApiDBContext = cookingApiDBContext;
             _userRepository = userRepository;
             _translateUser = translateUser;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
-        public List<UserDTO> GetAll()
+        public async Task<IEnumerable<UserDTO>> GetUsersAsync()
         {
-            List<User> users = _userRepository.GetAll();
+            var users = await _userManager.Users.ToListAsync();
 
-            List<UserDTO> userDTOs = users.Select(_translateUser.MapUserDTO).ToList();
-            return userDTOs;
+            return users.Select(user => new UserDTO
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                Name = user.Name,
+                IsAdmin = user.IsAdmin,
+                IsBlocked = user.IsBlocked,
+                RegistrationDate = user.RegistrationDate
+            });
         }
 
         public UserDTO GetById (int id) 
@@ -54,9 +69,9 @@ namespace CookingCompassAPI.Services.Implementations
             return _userRepository.GetUserWithRecipes (id);
         }
 
-        public User GetByUsername (string username) 
+        public async Task<User> GetByNameAsync (string username) 
         {
-            var user = _userRepository.GetByUsername(username);
+            var user = await _userManager.FindByNameAsync(username);
 
             if (user == null)
             {
@@ -71,30 +86,42 @@ namespace CookingCompassAPI.Services.Implementations
             return _userRepository.UserExists(username);
         }
 
-        public void SaveUser (UserDTO userDTO)
+        public async Task<IdentityResult> RegisterUserAsync(UserRegistrationDTO userRegistrationDTO)
         {
-            if (userDTO == null)
+            var user = new User
             {
-                throw new ArgumentNullException(nameof(userDTO), "UserDTO cannot be null");
-            }
+                UserName = userRegistrationDTO.UserName,
+                Name = userRegistrationDTO.Name,
+                Email = userRegistrationDTO.Email,
+                IsAdmin = false,
+                IsBlocked = false,
+                RegistrationDate = DateTime.Now,
+                Recipes = new List<Recipe>()
+            };
 
-            User user = _translateUser.MapUser(userDTO);
+            var result = await _userManager.CreateAsync(user, userRegistrationDTO.Password);
+
+            return result;
+        }
+
+        public async Task<SignInResult> LoginUserAsync(LoginResponseDTO loginResponseDTO)
+        {
+            var user = await _userManager.FindByEmailAsync(loginResponseDTO.Email);
+
+
             if (user == null)
             {
-                throw new InvalidOperationException("Mapped user cannot be null");
+                return SignInResult.Failed;
             }
 
-            bool userExists = _userRepository.GetAny(userDTO.Id);
-            if (!userExists)
+            if (user.IsBlocked)
             {
-                _userRepository.Add(user);
-            }
-            else
-            {
-                _userRepository.Update(user);
+                return SignInResult.LockedOut;
             }
 
-            _cookingCompassApiDBContext.SaveChanges();
+            var result = await _signInManager.PasswordSignInAsync(user, loginResponseDTO.Password, false, lockoutOnFailure: true);
+
+            return result;
         }
 
         public void RemoveUser (int id)

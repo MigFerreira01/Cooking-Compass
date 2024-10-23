@@ -4,6 +4,7 @@ using CookingCompassAPI.Domain.DAL;
 using CookingCompassAPI.Repositories.Interfaces;
 using CookingCompassAPI.Services.Interfaces;
 using CookingCompassAPI.Services.Translates;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace CookingCompassAPI.Services.Implementations
@@ -11,7 +12,7 @@ namespace CookingCompassAPI.Services.Implementations
     public class RecipeService : IRecipeService
     {
 
-        private CookingCompassApiDBContext _cookingApiDBContext;
+        private CookingCompassApiDBContext _dbContext;
 
         private IRecipeRepository _recipeRepository;
 
@@ -25,7 +26,7 @@ namespace CookingCompassAPI.Services.Implementations
 
         public RecipeService(CookingCompassApiDBContext cookingApiDBContext, IRecipeRepository recipeRepository, ILogger<RecipeService> logger, TranslateRecipe translateRecipe, IUserService userService, TranslateUser translateUser)
         {
-            _cookingApiDBContext = cookingApiDBContext;
+            _dbContext = cookingApiDBContext;
             _recipeRepository = recipeRepository;
             _translateRecipe = translateRecipe;
             _logger = logger;
@@ -33,39 +34,67 @@ namespace CookingCompassAPI.Services.Implementations
             _translateUser = translateUser;
         }
 
-        public List<RecipeDTO> GetAll()
+        public async Task<RecipeDTO> GetRecipeByIdAsync(int id)
         {
+            var recipe = await _recipeRepository.GetByIdAsync(id);
 
-            List<Recipe> recipes = _recipeRepository.GetAll();
-
-            List<RecipeDTO> recipeDTOs = recipes.Select(_translateRecipe.MapRecipeDTO).ToList();
-
-            return recipeDTOs;
+            if (recipe == null)
+            {
+                return null;
+            }
+            return _translateRecipe.MapRecipeDTO(recipe);
         }
 
-        public void AddRecipe(RecipeDTO recipeDTO)
+        public async Task<Recipe> AddRecipeAsync (RecipeDTO recipeDTO)
         {
-            var existingUser = _userService.GetByUsername(recipeDTO.User);
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
-            if (existingUser == null)
+            try
             {
-                throw new ArgumentException($"User '{recipeDTO.User}' does not exist.");
+                var existingUser = await _userService.GetByNameAsync(recipeDTO.User);
+                if (existingUser == null)
+                {
+                    throw new ArgumentException($"User '{recipeDTO.User}' does not exist.");
+                }
+
+                var recipe = await _translateRecipe.MapRecipeAsync(recipeDTO);
+                recipe.User = existingUser;
+
+                _recipeRepository.Add(recipe);
+
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return recipe;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task<bool> RemoveRecipeAsync(int id)
+        {
+            
+            var recipe = await _recipeRepository.GetByIdAsync(id);
+
+            if (recipe == null)
+            {
+                
+                return false;
             }
 
-            var recipe = _translateRecipe.MapRecipe(recipeDTO);
-
-            recipe.User = existingUser;
-
-            _recipeRepository.Add(recipe);
-        }
-
-        public void RemoveRecipe(int id)
-        {
-            Recipe recipeResult = _recipeRepository.GetById(id);
-
-            if (recipeResult != null)
+            try
             {
-                _recipeRepository.Remove(recipeResult);
+                _recipeRepository.Remove(recipe);
+                await _dbContext.SaveChangesAsync();
+
+                return true; 
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("An error occurred while removing the recipe.", ex);
             }
         }
 

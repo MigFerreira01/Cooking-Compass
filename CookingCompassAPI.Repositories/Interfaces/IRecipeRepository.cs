@@ -12,7 +12,7 @@ namespace CookingCompassAPI.Repositories.Interfaces
 
         List<Recipe> GetAll();
 
-        Recipe GetById(int id);
+        Task<Recipe> GetByIdAsync(int id);
 
         Recipe Add (Recipe recipe);
 

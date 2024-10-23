@@ -34,9 +34,13 @@ namespace CookingCompassAPI.Repositories.Implementations
              .ToList();
         }
 
-        public Recipe GetById(int id)
+        public async Task<Recipe> GetByIdAsync(int id)
         {
-            return _dbSet.FirstOrDefault(recipe => recipe.Id == id);
+            return await _dbContext.Recipes
+                .Include(r => r.User)
+                .Include(r => r.RecipeIngredients).ThenInclude(ri => ri.Ingredient)
+                .Include(r => r.Comments)
+                .FirstOrDefaultAsync(r => r.Id == id);
         }
 
         public bool GetAny(int id)

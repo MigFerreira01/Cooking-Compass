@@ -18,25 +18,58 @@ namespace CookingCompassAPI.Controllers
 
         }
 
-        [HttpGet]
-        public List<RecipeDTO> GetAll()
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetRecipe(int id)
         {
-            return _recipeService.GetAll();
+            var recipe = await _recipeService.GetRecipeByIdAsync(id);
+
+            if (recipe == null)
+            {
+                return NotFound(new { message = $"Recipe with id {id} not found." });
+            }
+
+            return Ok(recipe);
         }
 
         [HttpPost]
-
-        public void AddRecipe(RecipeDTO recipeDTO) 
+        public async Task<IActionResult> AddRecipe(RecipeDTO recipeDTO)
         {
-            _recipeService.AddRecipe(recipeDTO);
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var result = await _recipeService.AddRecipeAsync(recipeDTO);
+                    return CreatedAtAction(nameof(GetRecipe), new { id = result.Id }, result);
+
+                }
+                catch (ArgumentException ex)
+                {
+                    return BadRequest(new { error = ex.Message });
+                }
+            }
+
+            return BadRequest(ModelState);
         }
-    
 
 
         [HttpDelete("{id}")]
-        public void RemoveRecipe (int id) 
+        public async Task<IActionResult> RemoveRecipe(int id)
         {
-            _recipeService.RemoveRecipe(id);
+            try
+            {
+                var success = await _recipeService.RemoveRecipeAsync(id);
+
+                if (!success)
+                {
+                    return NotFound(new { message = $"Recipe with id {id} not found." });
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while deleting the recipe.", details = ex.Message });
+            }
         }
     }
 }

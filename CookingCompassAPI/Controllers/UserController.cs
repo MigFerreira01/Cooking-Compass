@@ -1,26 +1,34 @@
 ﻿using CookingCompassAPI.Domain;
+using CookingCompassAPI.Domain.DTO;
 using CookingCompassAPI.Domain.DTO_s;
 using CookingCompassAPI.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace CookingCompassAPI.Controllers
 {
     [Route("CookingCompassAPI/[Controller]")]
+    [Authorize]
     [ApiController]
     public class UserController : ControllerBase
     {
         private IUserService _userService;
 
         private readonly UserManager<User> _userManager;
+        private readonly IConfiguration _configuration;
 
-        public UserController(IUserService userService, UserManager<User> userManager) 
+        public UserController(IUserService userService, UserManager<User> userManager, IConfiguration configuration) 
         {
             
             _userService = userService;
             _userManager = userManager;
-
+            _configuration = configuration;
         }
 
         [HttpGet("userId/{id}")]
@@ -32,7 +40,7 @@ namespace CookingCompassAPI.Controllers
 
         [HttpGet("username/{username}")]
 
-        public User GetUserWithRecipes (string username)
+        public UserDTO GetUserWithRecipes (string username)
         {
             return _userService.GetUserWithRecipes(username);
         }
@@ -45,6 +53,7 @@ namespace CookingCompassAPI.Controllers
         }
 
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<IActionResult> Register(UserRegistrationDTO userRegistrationDTO)
         {
             if (ModelState.IsValid)
@@ -61,6 +70,7 @@ namespace CookingCompassAPI.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginResponseDTO loginResponseDTO)
         {
 
@@ -70,7 +80,9 @@ namespace CookingCompassAPI.Controllers
 
                 if (result.Succeeded)
                 {
-                    return Ok("Login successful!"); 
+                    var user = await _userService.GetByNameAsync("AdminUser");
+
+                    return Ok(GenerateJWTToken(user)); 
                 }
                 else if (result.IsLockedOut)
                 {
@@ -91,5 +103,25 @@ namespace CookingCompassAPI.Controllers
         {
             _userService.RemoveUser(id);
         }
+
+        private string GenerateJWTToken(UserDTO user)
+        {
+            var claims = new List<Claim> {
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Name, user.Name),
+    };
+            var jwtToken = new JwtSecurityToken(
+                claims: claims,
+                notBefore: DateTime.UtcNow,
+                expires: DateTime.UtcNow.AddDays(30),
+                signingCredentials: new SigningCredentials(
+                    new SymmetricSecurityKey(
+                       Encoding.UTF8.GetBytes(_configuration.GetSection("ApplicationSettings:JWT_Secret").Value)
+                        ),
+                    SecurityAlgorithms.HmacSha256Signature)
+                );
+            return new JwtSecurityTokenHandler().WriteToken(jwtToken);
+        }
+
     }
 }

@@ -13,7 +13,7 @@ namespace CookingCompassAPI.Data.Context
         {
             // Build configuration
             IConfigurationRoot configuration = new ConfigurationBuilder()
-            .SetBasePath(@"C:\Users\Miguel Ferreira\Source\Repos\MigFerreira01\Cooking-Compass\CookingCompassAPI")
+            .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json")
                 .Build();
 

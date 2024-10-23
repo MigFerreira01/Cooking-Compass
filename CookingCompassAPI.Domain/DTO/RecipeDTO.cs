@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CookingCompassAPI.Domain.DAL
+namespace CookingCompassAPI.Domain.DTO
 {
     public class RecipeDTO
     {

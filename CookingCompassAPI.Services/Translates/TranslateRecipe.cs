@@ -1,17 +1,14 @@
 ﻿using CookingCompassAPI.Data.Context;
 using CookingCompassAPI.Domain;
-using CookingCompassAPI.Domain.DAL;
+using CookingCompassAPI.Domain.DTO;
 using CookingCompassAPI.Domain.DTO_s;
 using CookingCompassAPI.Repositories.Interfaces;
-using CookingCompassAPI.Services.Implementations;
 using CookingCompassAPI.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace CookingCompassAPI.Services.Translates
 {
     public class TranslateRecipe
-    {
-        private IUserService _userService;
+    { 
 
         private readonly TranslateUser _translateUser;
 
@@ -21,24 +18,20 @@ namespace CookingCompassAPI.Services.Translates
 
         private CookingCompassApiDBContext _dbContext;
 
-        public TranslateRecipe(IUserService userService, TranslateUser translateUser, IIngredientService ingredientService, IIngredientRepository ingredientRepository, CookingCompassApiDBContext dBContext)
+        public TranslateRecipe(TranslateUser translateUser, IIngredientService ingredientService, IIngredientRepository ingredientRepository, CookingCompassApiDBContext dBContext)
         {
-            _userService = userService;
             _translateUser = translateUser;
             _ingredientService = ingredientService;
             _ingredientRepository = ingredientRepository;
             _dbContext = dBContext;
         }
 
-        public async Task<Recipe> MapRecipeAsync (RecipeDTO recipeDTO)
+        public Recipe MapRecipe (RecipeDTO recipeDTO)
         {
             if (recipeDTO == null)
             {
                 throw new ArgumentNullException(nameof(recipeDTO));
             }
-
-            var user = await _userService.GetByNameAsync(recipeDTO.User);
-
 
             return new Recipe
             {
@@ -47,11 +40,10 @@ namespace CookingCompassAPI.Services.Translates
                 Description = recipeDTO.Description ?? "No description available.",
                 Duration = recipeDTO.Duration,
                 RecipeIngredients = MapRecipeIngredients(recipeDTO.Ingredients),
-                User = user,
                 Difficulty = GetDifficultyLevelByString(recipeDTO.Difficulty),
                 Category = GetRecipeCategoryByString(recipeDTO.Category),
                 Status = GetApprovalStatusByString(recipeDTO.Status),
-                Comments = await MapCommentsAsync(recipeDTO.Comments)
+                Comments = MapCommentsAsync(recipeDTO.Comments)
             };
         }
 
@@ -95,7 +87,7 @@ namespace CookingCompassAPI.Services.Translates
             return recipeIngredients;
         }
 
-        private async Task<List<Comment>> MapCommentsAsync (IEnumerable<CommentDTO> commentDTOs)
+        private List<Comment> MapCommentsAsync (IEnumerable<CommentDTO> commentDTOs)
         {
 
             var comments = new List<Comment>();
@@ -109,17 +101,9 @@ namespace CookingCompassAPI.Services.Translates
                     throw new ArgumentNullException(nameof(comment), "Comment data cannot be null.");
                 }
 
-                var user = await _userService.GetByNameAsync(comment.User);
-
-                if (user == null)
-                {
-                    throw new ArgumentException($"User '{comment.User}' does not exist.");
-                }
-
                 comments.Add(new Comment
                 {
                     Id = comment.Id,
-                    User = user,
                     Content = comment.Content,
                     CreatedAt = comment.CreatedAt,
                 });
@@ -134,9 +118,10 @@ namespace CookingCompassAPI.Services.Translates
             Name = recipe.Name,
             Description = recipe.Description,
             Duration = recipe.Duration,
-            Ingredients = recipe.RecipeIngredients.Select(ing => new RecipeIngredientDTO
+            Ingredients = recipe.RecipeIngredients?.Select(ing => new RecipeIngredientDTO
             {
                 IngredientID = ing.Ingredient?.Id ?? 0,
+                IngredientName = ing.Ingredient.Name,
                 Quantity = ing.Quantity,
                 Unit = ing.Unit,
             }).ToList() ?? new List<RecipeIngredientDTO>(),
@@ -144,7 +129,7 @@ namespace CookingCompassAPI.Services.Translates
             Category = recipe.Category.ToString() ?? "Unknown",
             Difficulty = recipe.Difficulty.ToString() ?? "Unknown",
             Status = recipe.Status.ToString() ?? "Unknown",
-            Comments = recipe.Comments.Select(comment => new CommentDTO
+            Comments = recipe.Comments?.Select(comment => new CommentDTO
             {
                 Id = comment.Id,
                 User = comment.User?.Name ?? "Anonymous",

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using CookingCompassAPI.Domain.DTO;
 
 namespace CookingCompassAPI.Services.Translates
 {
@@ -48,15 +49,10 @@ namespace CookingCompassAPI.Services.Translates
             return new UserDTO
             {
                 Id = user.Id,
-
                 Name = user.Name,
-
                 Email = user.Email,
-
                 IsAdmin = user.IsAdmin,
-
                 IsBlocked = user.IsBlocked,
-
                 RegistrationDate = user.RegistrationDate
             };
         }

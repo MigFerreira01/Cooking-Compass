@@ -1,5 +1,4 @@
-﻿using CookingCompassAPI.Domain;
-using CookingCompassAPI.Domain.DAL;
+﻿using CookingCompassAPI.Domain.DTO;
 using CookingCompassAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,4 +1,5 @@
 ﻿using CookingCompassAPI.Domain;
+using CookingCompassAPI.Domain.DTO;
 using CookingCompassAPI.Domain.DTO_s;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -18,9 +19,9 @@ namespace CookingCompassAPI.Services.Interfaces
 
         bool UserExists (string username); 
 
-        Task<User> GetByNameAsync (string username);
+        Task<UserDTO> GetByNameAsync (string username);
 
-        User GetUserWithRecipes (string username);
+        UserDTO GetUserWithRecipes (string username);
 
         Task<IdentityResult> RegisterUserAsync(UserRegistrationDTO userRegistrationDTO);
 

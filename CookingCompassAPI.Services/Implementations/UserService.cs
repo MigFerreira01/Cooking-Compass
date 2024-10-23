@@ -1,5 +1,6 @@
 ﻿using CookingCompassAPI.Data.Context;
 using CookingCompassAPI.Domain;
+using CookingCompassAPI.Domain.DTO;
 using CookingCompassAPI.Domain.DTO_s;
 using CookingCompassAPI.Repositories.Implementations;
 using CookingCompassAPI.Repositories.Interfaces;
@@ -28,13 +29,16 @@ namespace CookingCompassAPI.Services.Implementations
 
         private readonly SignInManager<User> _signInManager;
 
-        public UserService (CookingCompassApiDBContext cookingApiDBContext, IUserRepository userRepository, TranslateUser translateUser, UserManager<User> userManager, SignInManager<User> signInManager)
+        private readonly TranslateRecipe _translateRecipe;
+
+        public UserService (CookingCompassApiDBContext cookingApiDBContext, IUserRepository userRepository, TranslateUser translateUser, UserManager<User> userManager, SignInManager<User> signInManager, TranslateRecipe translateRecipe)
         {
             _cookingCompassApiDBContext = cookingApiDBContext;
             _userRepository = userRepository;
             _translateUser = translateUser;
             _userManager = userManager;
             _signInManager = signInManager;
+            _translateRecipe = translateRecipe;
         }
 
         public async Task<IEnumerable<UserDTO>> GetUsersAsync()
@@ -60,16 +64,22 @@ namespace CookingCompassAPI.Services.Implementations
             return _translateUser.MapUserDTO(user);
         }
 
-        public User GetUserWithRecipes (string username) 
+        public UserDTO GetUserWithRecipes (string username) 
         {
             var user = _userRepository.GetByUsername (username);
 
             int id = user.Id;
 
-            return _userRepository.GetUserWithRecipes (id);
+            var userRecipes = _userRepository.GetUserWithRecipes (id);
+
+            var userRecipesDTO = _translateUser.MapUserDTO(userRecipes);
+
+            userRecipesDTO.Recipes = userRecipes.Recipes?.Select(_translateRecipe.MapRecipeDTO).ToList();
+
+            return userRecipesDTO;
         }
 
-        public async Task<User> GetByNameAsync (string username) 
+        public async Task<UserDTO> GetByNameAsync (string username) 
         {
             var user = await _userManager.FindByNameAsync(username);
 
@@ -78,7 +88,9 @@ namespace CookingCompassAPI.Services.Implementations
                 throw new ArgumentException($"User '{username}' not found");
             }
 
-            return user; 
+            var userDTO = _translateUser.MapUserDTO(user);
+
+            return userDTO; 
         }
 
         public bool UserExists (string username)

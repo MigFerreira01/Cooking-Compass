@@ -1,10 +1,12 @@
 ﻿using CookingCompassAPI.Domain.DTO;
 using CookingCompassAPI.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CookingCompassAPI.Controllers
 {
     [Route("CookingCompassAPI/[Controller]")]
+    [Authorize]
     [ApiController]
     public class RecipeController : ControllerBase
     {
@@ -18,6 +20,7 @@ namespace CookingCompassAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetRecipe(int id)
         {
             var recipe = await _recipeService.GetRecipeByIdAsync(id);
@@ -31,6 +34,7 @@ namespace CookingCompassAPI.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
 
         public List<RecipeDTO> GetAllRecipes() 
         { 

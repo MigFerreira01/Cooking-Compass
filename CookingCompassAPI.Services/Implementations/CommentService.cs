@@ -1,6 +1,13 @@
 ﻿using CookingCompassAPI.Data.Context;
 using CookingCompassAPI.Domain;
+using CookingCompassAPI.Domain.DTO;
+using CookingCompassAPI.Domain.DTO_s;
+using CookingCompassAPI.Repositories.Implementations;
 using CookingCompassAPI.Repositories.Interfaces;
+using CookingCompassAPI.Services.Interfaces;
+using CookingCompassAPI.Services.Translates;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,17 +16,27 @@ using System.Threading.Tasks;
 
 namespace CookingCompassAPI.Services.Implementations
 {
-    public class CommentService
+    public class CommentService : ICommentService
     {
 
         private CookingCompassApiDBContext _cookingApiDBContext;
 
         private ICommentRepository _commentRepository;
 
-        public CommentService (CookingCompassApiDBContext cookingApiDBContext, ICommentRepository commentRepository)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        private readonly IUserRepository _userRepository;
+
+        private readonly TranslateComment _translateComment;
+
+        public CommentService (CookingCompassApiDBContext cookingApiDBContext, ICommentRepository commentRepository, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, TranslateComment translateComment)
         {
             _cookingApiDBContext = cookingApiDBContext;
             _commentRepository = commentRepository;
+            _httpContextAccessor = httpContextAccessor; 
+            _userRepository = userRepository;
+            _translateComment = translateComment;
+            
         }
 
         public List<Comment> GetAll()
@@ -33,20 +50,55 @@ namespace CookingCompassAPI.Services.Implementations
         }
 
 
-        public Comment SaveComment (Comment comment)
+        public async Task<CommentDTO> SaveCommentAsync (CommentDTO commentDTO)
         {
-            bool commentExists = _commentRepository.GetAny(comment.Id);
+            using var transaction = await _cookingApiDBContext.Database.BeginTransactionAsync();
 
-            if (!commentExists)
+            try
             {
-              comment = _commentRepository.Add(comment);
-            }
-            else
-            {
-                comment = _commentRepository.Update(comment);
-            }
+                var username = _httpContextAccessor.HttpContext.User.Identity.Name;
 
-            return comment;
+                if (string.IsNullOrEmpty(username))
+                {
+                    throw new ArgumentException("User is not authenticated.");
+                }
+
+                var existingUser = _userRepository.GetByUsername(username);
+                if (existingUser == null)
+                {
+                    throw new ArgumentException($"User '{username}' does not exist.");
+                }
+
+                var comment = _translateComment.MapComment(commentDTO);
+
+                comment.User = existingUser;
+                _commentRepository.Add(comment);
+
+                await _cookingApiDBContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                commentDTO = _translateComment.MapCommentDTO(comment);
+
+                return commentDTO;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task<List<CommentDTO>> GetCommentsByRecipeIdAsync(int recipeId)
+        {
+            var comments = await _commentRepository.GetByRecipeIdAsync(recipeId);
+
+            if (comments == null || !comments.Any())
+            {
+                return new List<CommentDTO>();
+            }
+            var commentDTOs = comments.Select(comment => _translateComment.MapCommentDTO(comment)).ToList();
+
+            return commentDTOs;
         }
 
         public void RemoveComment (int id)

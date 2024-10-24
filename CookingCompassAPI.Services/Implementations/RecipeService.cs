@@ -4,6 +4,10 @@ using CookingCompassAPI.Repositories.Interfaces;
 using CookingCompassAPI.Services.Interfaces;
 using CookingCompassAPI.Services.Translates;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+using CookingCompassAPI.Domain.DTO_s;
+using CookingCompassAPI.Repositories.Implementations;
+using CookingCompassAPI.Domain;
 
 namespace CookingCompassAPI.Services.Implementations
 {
@@ -15,14 +19,14 @@ namespace CookingCompassAPI.Services.Implementations
         private IRecipeRepository _recipeRepository;
 
         private readonly TranslateUser _translateUser;
-
-        
-
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly TranslateComment _translateComment;
+        private readonly ICommentRepository _commentRepository;
         private readonly TranslateRecipe _translateRecipe;
         private readonly IUserRepository _userRepository;
         private readonly ILogger<RecipeService> _logger;
 
-        public RecipeService(CookingCompassApiDBContext cookingApiDBContext, IRecipeRepository recipeRepository, ILogger<RecipeService> logger, TranslateRecipe translateRecipe, IUserRepository userRepository, TranslateUser translateUser)
+        public RecipeService(CookingCompassApiDBContext cookingApiDBContext, IRecipeRepository recipeRepository, ILogger<RecipeService> logger, TranslateRecipe translateRecipe, IUserRepository userRepository, TranslateUser translateUser, IHttpContextAccessor httpContextAccessor, TranslateComment translateComment, ICommentRepository commentRepository)
         {
             _dbContext = cookingApiDBContext;
             _recipeRepository = recipeRepository;
@@ -31,6 +35,18 @@ namespace CookingCompassAPI.Services.Implementations
             _logger = logger;
             
             _translateUser = translateUser;
+            _httpContextAccessor = httpContextAccessor;
+            _translateComment = translateComment;
+            _commentRepository = commentRepository;
+        }
+
+        public List<RecipeDTO> GetAllRecipes()
+        {
+            List<Recipe> recipes = _recipeRepository.GetAll();
+
+            List<RecipeDTO> recipeDTOs = recipes.Select(_translateRecipe.MapRecipeDTO).ToList();
+
+            return recipeDTOs;
         }
 
         public async Task<RecipeDTO> GetRecipeByIdAsync(int id)
@@ -50,16 +66,22 @@ namespace CookingCompassAPI.Services.Implementations
 
             try
             {
-                var existingUser =  _userRepository.GetByUsername(recipeDTO.User);
+                var username = _httpContextAccessor.HttpContext.User.Identity.Name;
 
-                if (existingUser == null)
+                if (string.IsNullOrEmpty(username))
                 {
-                    throw new ArgumentException($"User '{recipeDTO.User}' does not exist.");
+                    throw new ArgumentException("User is not authenticated.");
                 }
 
-                var recipe =  _translateRecipe.MapRecipe(recipeDTO);
+                var existingUser = _userRepository.GetByUsername(username);
+                if (existingUser == null)
+                {
+                    throw new ArgumentException($"User '{username}' does not exist.");
+                }
 
+                var recipe = _translateRecipe.MapRecipe(recipeDTO);
                 recipe.User = existingUser;
+                
 
                 _recipeRepository.Add(recipe);
 
@@ -69,6 +91,50 @@ namespace CookingCompassAPI.Services.Implementations
                 recipeDTO = _translateRecipe.MapRecipeDTO(recipe);
 
                 return recipeDTO;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task AddCommentsToRecipeAsync(int recipeId, List<CommentDTO> commentDTOs)
+        {
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+            try
+            {
+                var username = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    throw new ArgumentException("User is not authenticated.");
+                }
+
+                var existingUser = _userRepository.GetByUsername(username);
+                if (existingUser == null)
+                {
+                    throw new ArgumentException($"User '{username}' does not exist.");
+                }
+
+                var recipe = await _recipeRepository.GetByIdAsync(recipeId);
+                if (recipe == null)
+                {
+                    throw new ArgumentException($"Recipe with ID {recipeId} does not exist.");
+                }
+
+                var comments = commentDTOs.Select(commentDTO => _translateComment.MapComment(commentDTO)).ToList();
+
+                foreach (var comment in comments)
+                {
+                    comment.User = existingUser;
+                    comment.RecipeId = recipeId;
+                    _commentRepository.Add(comment);
+                }
+
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
             catch
             {

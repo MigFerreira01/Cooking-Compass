@@ -23,8 +23,6 @@ namespace CookingCompassAPI.Domain
 
         public ApprovalStatus Status { get; set; }
 
-        public List<Comment> Comments { get; set; }
-
         public int Duration { get; set; }
 
     }

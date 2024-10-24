@@ -72,14 +72,27 @@ namespace CookingCompassAPI
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
             builder.Services.AddScoped<IIngredientRepository, IngredientRepository>();
+            builder.Services.AddScoped<ICommentRepository, CommentRepository>();
             builder.Services.AddScoped<TranslateUser>();
             builder.Services.AddScoped<TranslateRecipe>();
+            builder.Services.AddScoped<TranslateComment>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IRecipeService, RecipeService>();
             builder.Services.AddScoped<IIngredientService, IngredientService>();
+            builder.Services.AddScoped<ICommentService, CommentService>();
 
             builder.Services.AddScoped<UserManager<User>>();
             builder.Services.AddScoped<SignInManager<User>>();
+
+            
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins",
+                            builder => builder.AllowAnyOrigin()
+                              .AllowAnyMethod()
+                              .AllowAnyHeader());
+            });
 
             builder.Services.AddControllers();
 
@@ -116,12 +129,15 @@ namespace CookingCompassAPI
             }
 
             app.UseHttpsRedirection();
+
+
+
+            app.UseCors("AllowAllOrigins");
+
             app.UseRouting();
 
-            
-            app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
-
             app.UseAuthentication();
+
             app.UseAuthorization();
 
             

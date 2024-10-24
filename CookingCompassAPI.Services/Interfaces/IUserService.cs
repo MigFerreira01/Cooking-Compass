@@ -21,6 +21,8 @@ namespace CookingCompassAPI.Services.Interfaces
 
         Task<UserDTO> GetByNameAsync (string username);
 
+        Task<UserDTO> GetByEmailAsync(string email);
+
         UserDTO GetUserWithRecipes (string username);
 
         Task<IdentityResult> RegisterUserAsync(UserRegistrationDTO userRegistrationDTO);

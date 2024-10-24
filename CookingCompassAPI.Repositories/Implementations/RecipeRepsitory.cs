@@ -28,8 +28,6 @@ namespace CookingCompassAPI.Repositories.Implementations
            return _dbSet
              .Include(r => r.RecipeIngredients)
              .ThenInclude(ri => ri.Ingredient)
-             .Include(r => r.Comments)
-             .ThenInclude(c => c.User)
              .Include(r => r.User)
              .ToList();
         }
@@ -39,7 +37,6 @@ namespace CookingCompassAPI.Repositories.Implementations
             return await _dbContext.Recipes
                 .Include(r => r.User)
                 .Include(r => r.RecipeIngredients).ThenInclude(ri => ri.Ingredient)
-                .Include(r => r.Comments)
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 

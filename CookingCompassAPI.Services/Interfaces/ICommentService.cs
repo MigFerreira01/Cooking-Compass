@@ -1,4 +1,5 @@
 ﻿using CookingCompassAPI.Domain;
+using CookingCompassAPI.Domain.DTO_s;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace CookingCompassAPI.Services.Interfaces
 
         Comment GetById (int id);
 
-        Comment SaveComment (Comment comment);
+        Task<CommentDTO> SaveCommentAsync(CommentDTO commentDTO);
 
         void RemoveComment (int id);
     }

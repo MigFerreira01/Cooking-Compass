@@ -54,7 +54,7 @@ namespace CookingCompassAPI.Services.Implementations
                 IsAdmin = user.IsAdmin,
                 IsBlocked = user.IsBlocked,
                 RegistrationDate = user.RegistrationDate
-            });
+            }).ToList();
         }
 
         public UserDTO GetById (int id) 
@@ -92,6 +92,21 @@ namespace CookingCompassAPI.Services.Implementations
 
             return userDTO; 
         }
+
+        public async Task<UserDTO> GetByEmailAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                throw new ArgumentException($"User '{email}' not found");
+            }
+
+            var userDTO = _translateUser.MapUserDTO(user);
+
+            return userDTO;
+        }
+
 
         public bool UserExists (string username)
         {
@@ -135,6 +150,7 @@ namespace CookingCompassAPI.Services.Implementations
 
             return result;
         }
+
 
         public void RemoveUser (int id)
         {

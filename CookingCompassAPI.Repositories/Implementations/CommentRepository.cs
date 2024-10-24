@@ -41,7 +41,13 @@ namespace CookingCompassAPI.Repositories.Implementations
             return comment;
 
         }
-
+        public async Task<List<Comment>> GetByRecipeIdAsync(int recipeId)
+        {
+                
+         return await _dbContext.Comments
+                    .Where(c => c.RecipeId == recipeId) 
+                    .ToListAsync();
+        }
         public Comment Update (Comment comment) 
         {
             

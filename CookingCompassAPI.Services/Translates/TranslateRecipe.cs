@@ -43,7 +43,6 @@ namespace CookingCompassAPI.Services.Translates
                 Difficulty = GetDifficultyLevelByString(recipeDTO.Difficulty),
                 Category = GetRecipeCategoryByString(recipeDTO.Category),
                 Status = GetApprovalStatusByString(recipeDTO.Status),
-                Comments = MapCommentsAsync(recipeDTO.Comments)
             };
         }
 
@@ -87,31 +86,6 @@ namespace CookingCompassAPI.Services.Translates
             return recipeIngredients;
         }
 
-        private List<Comment> MapCommentsAsync (IEnumerable<CommentDTO> commentDTOs)
-        {
-
-            var comments = new List<Comment>();
-
-            if (commentDTOs == null) return comments;
-
-            foreach (var comment in commentDTOs)
-            {
-                if (comment == null)
-                {
-                    throw new ArgumentNullException(nameof(comment), "Comment data cannot be null.");
-                }
-
-                comments.Add(new Comment
-                {
-                    Id = comment.Id,
-                    Content = comment.Content,
-                    CreatedAt = comment.CreatedAt,
-                });
-            }
-
-            return comments;
-        }
-
         public RecipeDTO MapRecipeDTO(Recipe recipe) => new RecipeDTO
         {
             Id = recipe.Id,
@@ -129,13 +103,6 @@ namespace CookingCompassAPI.Services.Translates
             Category = recipe.Category.ToString() ?? "Unknown",
             Difficulty = recipe.Difficulty.ToString() ?? "Unknown",
             Status = recipe.Status.ToString() ?? "Unknown",
-            Comments = recipe.Comments?.Select(comment => new CommentDTO
-            {
-                Id = comment.Id,
-                User = comment.User?.Name ?? "Anonymous",
-                Content = comment.Content,
-                CreatedAt = comment.CreatedAt,
-            }).ToList() ?? new List<CommentDTO>(),
         };
 
         private TEnum ParseEnum<TEnum>(string value) where TEnum : struct

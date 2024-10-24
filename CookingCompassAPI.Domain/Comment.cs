@@ -11,7 +11,5 @@
         public User User { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        public bool IsDeleted { get; set; } // Soft delete flag
-
     }
 }

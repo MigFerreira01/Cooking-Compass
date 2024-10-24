@@ -30,6 +30,13 @@ namespace CookingCompassAPI.Controllers
             return Ok(recipe);
         }
 
+        [HttpGet]
+
+        public List<RecipeDTO> GetAllRecipes() 
+        { 
+            return _recipeService.GetAllRecipes();
+        }
+
         [HttpPost]
         public async Task<IActionResult> AddRecipe(RecipeDTO recipeDTO)
         {

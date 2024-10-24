@@ -2,6 +2,7 @@
 using CookingCompassAPI.Domain.DTO;
 using CookingCompassAPI.Domain.DTO_s;
 using CookingCompassAPI.Services.Interfaces;
+using CookingCompassAPI.Services.Translates;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -22,13 +23,15 @@ namespace CookingCompassAPI.Controllers
 
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly TranslateUser _translateUser;
 
-        public UserController(IUserService userService, UserManager<User> userManager, IConfiguration configuration) 
+        public UserController(IUserService userService, UserManager<User> userManager, IConfiguration configuration, TranslateUser translateUser) 
         {
             
             _userService = userService;
             _userManager = userManager;
             _configuration = configuration;
+            _translateUser = translateUser;
         }
 
         [HttpGet("userId/{id}")]
@@ -42,11 +45,13 @@ namespace CookingCompassAPI.Controllers
 
         public UserDTO GetUserWithRecipes (string username)
         {
-            return _userService.GetUserWithRecipes(username);
+            var user = _userService.GetUserWithRecipes(username);
+
+            return user;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
         {
             var users = await _userService.GetUsersAsync();
             return Ok(users);
@@ -80,9 +85,11 @@ namespace CookingCompassAPI.Controllers
 
                 if (result.Succeeded)
                 {
-                    var user = await _userService.GetByNameAsync("AdminUser");
+                    var user = await _userService.GetByEmailAsync(loginResponseDTO.Email);
 
-                    return Ok(GenerateJWTToken(user)); 
+                    var token = GenerateJWTToken(user); 
+
+                    return Ok(new { token });
                 }
                 else if (result.IsLockedOut)
                 {
@@ -113,7 +120,7 @@ namespace CookingCompassAPI.Controllers
             var jwtToken = new JwtSecurityToken(
                 claims: claims,
                 notBefore: DateTime.UtcNow,
-                expires: DateTime.UtcNow.AddDays(30),
+                expires: DateTime.UtcNow.AddMinutes(30),
                 signingCredentials: new SigningCredentials(
                     new SymmetricSecurityKey(
                        Encoding.UTF8.GetBytes(_configuration.GetSection("ApplicationSettings:JWT_Secret").Value)

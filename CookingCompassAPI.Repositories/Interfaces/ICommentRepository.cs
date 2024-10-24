@@ -18,6 +18,8 @@ namespace CookingCompassAPI.Repositories.Interfaces
 
         bool GetAny (int id);
 
+        Task<List<Comment>> GetByRecipeIdAsync(int recipeId);
+
         Comment Update (Comment comment);    
 
         void Remove (Comment comment);

@@ -25,5 +25,6 @@ namespace CookingCompassAPI.Domain
 
         public int Duration { get; set; }
 
+        public string ImageUrl { get; set; }
     }
 }

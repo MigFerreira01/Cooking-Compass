@@ -41,6 +41,29 @@ namespace CookingCompassAPI.Controllers
             return _recipeService.GetAllRecipes();
         }
 
+        [HttpPost("{recipeId}")]
+
+        public async Task<IActionResult> UpdateRecipe (int id)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var result = await _recipeService.UpdateRecipeAsync(id);
+
+                    return CreatedAtAction(nameof(GetRecipe), new { id = result.Id }, result);
+
+                }
+                catch (ArgumentException ex)
+                {
+                    return BadRequest(new { error = ex.Message });
+                }
+            }
+
+            return BadRequest(ModelState);
+
+        }
+
         [HttpPost]
         public async Task<IActionResult> AddRecipe(RecipeDTO recipeDTO)
         {

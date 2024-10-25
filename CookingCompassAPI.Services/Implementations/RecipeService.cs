@@ -167,6 +167,30 @@ namespace CookingCompassAPI.Services.Implementations
             }
         }
 
+        public async Task<RecipeDTO> UpdateRecipeAsync (int recipeId)
+        {
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+            try
+            {
+                Recipe recipe = await _recipeRepository.GetByIdAsync(recipeId);
+
+                _recipeRepository.Update(recipe);
+
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+               RecipeDTO recipeDTO = _translateRecipe.MapRecipeDTO(recipe);
+
+                return recipeDTO;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
     }
 
 }

@@ -18,6 +18,8 @@ namespace CookingCompassAPI.Repositories.Interfaces
 
         bool GetAny(int id);
 
+        Recipe Update (Recipe recipe);
+
         void Remove(Recipe recipe);
 
 

@@ -37,9 +37,6 @@ namespace CookingCompassAPI.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<int>("RecipeId")
                         .HasColumnType("int");
 
@@ -47,8 +44,6 @@ namespace CookingCompassAPI.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RecipeId");
 
                     b.HasIndex("UserId");
 
@@ -114,6 +109,10 @@ namespace CookingCompassAPI.Data.Migrations
 
                     b.Property<int>("Duration")
                         .HasColumnType("int");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -370,19 +369,11 @@ namespace CookingCompassAPI.Data.Migrations
 
             modelBuilder.Entity("CookingCompassAPI.Domain.Comment", b =>
                 {
-                    b.HasOne("CookingCompassAPI.Domain.Recipe", "Recipe")
-                        .WithMany("Comments")
-                        .HasForeignKey("RecipeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("CookingCompassAPI.Domain.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Recipe");
 
                     b.Navigation("User");
                 });
@@ -475,8 +466,6 @@ namespace CookingCompassAPI.Data.Migrations
 
             modelBuilder.Entity("CookingCompassAPI.Domain.Recipe", b =>
                 {
-                    b.Navigation("Comments");
-
                     b.Navigation("RecipeIngredients");
                 });
 

@@ -43,6 +43,7 @@ namespace CookingCompassAPI.Services.Translates
                 Difficulty = GetDifficultyLevelByString(recipeDTO.Difficulty),
                 Category = GetRecipeCategoryByString(recipeDTO.Category),
                 Status = GetApprovalStatusByString(recipeDTO.Status),
+                ImageUrl= recipeDTO.ImageURL,
             };
         }
 
@@ -103,6 +104,7 @@ namespace CookingCompassAPI.Services.Translates
             Category = recipe.Category.ToString() ?? "Unknown",
             Difficulty = recipe.Difficulty.ToString() ?? "Unknown",
             Status = recipe.Status.ToString() ?? "Unknown",
+            ImageURL=recipe.ImageUrl
         };
 
         private TEnum ParseEnum<TEnum>(string value) where TEnum : struct

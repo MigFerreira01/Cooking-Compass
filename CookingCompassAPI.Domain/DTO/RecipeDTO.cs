@@ -19,6 +19,7 @@ namespace CookingCompassAPI.Domain.DTO
         public string Status { get; set; }
         public int Duration { get; set; } 
         public List<RecipeIngredientDTO> Ingredients { get; set; }
+        public string ImageURL { get; set; }
 
     }
 }

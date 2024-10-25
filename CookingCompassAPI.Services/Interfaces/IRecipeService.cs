@@ -15,5 +15,7 @@ namespace CookingCompassAPI.Services.Interfaces
         Task AddCommentsToRecipeAsync(int recipeId, List<CommentDTO> commentDTOs);
 
         Task<bool> RemoveRecipeAsync(int id);
+
+        Task<RecipeDTO> UpdateRecipeAsync (int id);
     }
 }

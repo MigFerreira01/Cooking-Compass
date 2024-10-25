@@ -30,5 +30,9 @@ namespace CookingCompassAPI.Services.Interfaces
         Task<SignInResult> LoginUserAsync(LoginResponseDTO loginResponseDTO);
 
         Task<IEnumerable<UserDTO>> GetUsersAsync();
+
+        Task<UserDTO> UpdateUserAsync(UserDTO userDTO);
+
+        string GetUserBySession();
     }
 }

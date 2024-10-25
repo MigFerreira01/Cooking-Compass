@@ -167,27 +167,40 @@ namespace CookingCompassAPI.Services.Implementations
             }
         }
 
-        public async Task<RecipeDTO> UpdateRecipeAsync (int recipeId)
+
+        public async Task<RecipeDTO> UpdateRecipeAsync(int id, RecipeDTO recipeDTO)
         {
             using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
             try
             {
-                Recipe recipe = await _recipeRepository.GetByIdAsync(recipeId);
+                
+                var recipe = await _recipeRepository.GetByIdAsync(id);
 
-                _recipeRepository.Update(recipe);
+                if (recipe == null)
+                {
+                    throw new ArgumentException($"Recipe with ID {id} does not exist.");
+                }
 
+
+                
+                recipe.Name = recipeDTO.Name;
+                recipe.Description = recipeDTO.Description;
+                recipe.Category = Enum.Parse<RecipeCategory>(recipeDTO.Category);
+                recipe.Difficulty = Enum.Parse<DifficultyLevel>(recipeDTO.Difficulty); 
+                recipe.Status = Enum.Parse<ApprovalStatus>(recipeDTO.Status); 
+                recipe.ImageUrl = recipeDTO.ImageURL; 
+
+               
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-               RecipeDTO recipeDTO = _translateRecipe.MapRecipeDTO(recipe);
-
-                return recipeDTO;
+                return _translateRecipe.MapRecipeDTO(recipe); 
             }
             catch
             {
                 await transaction.RollbackAsync();
-                throw;
+                throw; 
             }
         }
 

@@ -16,6 +16,6 @@ namespace CookingCompassAPI.Services.Interfaces
 
         Task<bool> RemoveRecipeAsync(int id);
 
-        Task<RecipeDTO> UpdateRecipeAsync (int id);
+        Task<RecipeDTO> UpdateRecipeAsync(int id, RecipeDTO recipeDTO);
     }
 }

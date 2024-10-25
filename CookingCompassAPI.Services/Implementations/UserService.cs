@@ -6,6 +6,7 @@ using CookingCompassAPI.Repositories.Implementations;
 using CookingCompassAPI.Repositories.Interfaces;
 using CookingCompassAPI.Services.Interfaces;
 using CookingCompassAPI.Services.Translates;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -23,6 +24,8 @@ namespace CookingCompassAPI.Services.Implementations
 
         private IUserRepository _userRepository;
 
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
         private readonly TranslateUser _translateUser;
 
         private readonly UserManager<User> _userManager;
@@ -31,7 +34,7 @@ namespace CookingCompassAPI.Services.Implementations
 
         private readonly TranslateRecipe _translateRecipe;
 
-        public UserService (CookingCompassApiDBContext cookingApiDBContext, IUserRepository userRepository, TranslateUser translateUser, UserManager<User> userManager, SignInManager<User> signInManager, TranslateRecipe translateRecipe)
+        public UserService (CookingCompassApiDBContext cookingApiDBContext, IUserRepository userRepository, TranslateUser translateUser, UserManager<User> userManager, SignInManager<User> signInManager, TranslateRecipe translateRecipe, IHttpContextAccessor httpContextAccessor)
         {
             _cookingCompassApiDBContext = cookingApiDBContext;
             _userRepository = userRepository;
@@ -39,6 +42,7 @@ namespace CookingCompassAPI.Services.Implementations
             _userManager = userManager;
             _signInManager = signInManager;
             _translateRecipe = translateRecipe;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<IEnumerable<UserDTO>> GetUsersAsync()
@@ -62,6 +66,13 @@ namespace CookingCompassAPI.Services.Implementations
             var user = _userRepository.GetById (id);
             
             return _translateUser.MapUserDTO(user);
+        }
+
+        public string GetUserBySession ()
+        {
+            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+            return userId;
         }
 
         public UserDTO GetUserWithRecipes (string username) 
@@ -107,6 +118,28 @@ namespace CookingCompassAPI.Services.Implementations
             return userDTO;
         }
 
+        public async Task<UserDTO> UpdateUserAsync(UserDTO userDTO)
+        {
+            
+            User userOriginal = _translateUser.MapUser(userDTO);
+
+            // Update the user using the UserManager
+            var result = await _userManager.UpdateAsync(userOriginal);
+
+            if (result.Succeeded)
+            {
+                
+                var updatedUser = await _userManager.FindByIdAsync(userOriginal.Id.ToString());
+
+              
+                return _translateUser.MapUserDTO(updatedUser);
+            }
+            else
+            {
+                
+                throw new Exception("User update failed: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+            }
+        }
 
         public bool UserExists (string username)
         {

@@ -41,6 +41,13 @@ namespace CookingCompassAPI.Controllers
             return _userService.GetById(id);
         }
 
+        [HttpGet("session")]
+
+        public string GetUserBySession()
+        {
+            return _userService.GetUserBySession();
+        }
+
         [HttpGet("username/{username}")]
 
         public UserDTO GetUserWithRecipes (string username)
@@ -56,6 +63,16 @@ namespace CookingCompassAPI.Controllers
             var users = await _userService.GetUsersAsync();
             return Ok(users);
         }
+
+        [HttpPut("Update")]
+        public async Task<ActionResult<UserDTO>> UpdateUser(UserDTO userDTO)
+        {
+
+            return await _userService.UpdateUserAsync(userDTO);
+        }
+
+
+
 
         [HttpPost("register")]
         [AllowAnonymous]

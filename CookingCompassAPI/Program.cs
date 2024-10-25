@@ -118,6 +118,25 @@ namespace CookingCompassAPI
 
             var app = builder.Build();
 
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<CookingCompassApiDBContext>();
+                try
+                {
+                    // Check if the database exists
+                    if (!dbContext.Database.EnsureCreated())
+                    {
+                        // Database does not exist, run migrations
+                        dbContext.Database.Migrate();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Handle exceptions, log them or throw an error
+                    Console.WriteLine($"An error occurred while checking/creating the database: {ex.Message}");
+                }
+            }
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

@@ -41,29 +41,6 @@ namespace CookingCompassAPI.Controllers
             return _recipeService.GetAllRecipes();
         }
 
-        [HttpPost("{recipeId}")]
-
-        public async Task<IActionResult> UpdateRecipe (int id)
-        {
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    var result = await _recipeService.UpdateRecipeAsync(id);
-
-                    return CreatedAtAction(nameof(GetRecipe), new { id = result.Id }, result);
-
-                }
-                catch (ArgumentException ex)
-                {
-                    return BadRequest(new { error = ex.Message });
-                }
-            }
-
-            return BadRequest(ModelState);
-
-        }
-
         [HttpPost]
         public async Task<IActionResult> AddRecipe(RecipeDTO recipeDTO)
         {
@@ -102,6 +79,29 @@ namespace CookingCompassAPI.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred while deleting the recipe.", details = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateRecipe(int id, [FromBody] RecipeDTO recipeDTO)
+        {
+            if (id != recipeDTO.Id)
+            {
+                return BadRequest("Recipe ID mismatch.");
+            }
+
+            try
+            {
+                var updatedRecipe = await _recipeService.UpdateRecipeAsync(id, recipeDTO);
+                return Ok(updatedRecipe);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }
